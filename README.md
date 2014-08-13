@@ -1,0 +1,4 @@
+cdi-properties
+==============
+
+CDI Properties
