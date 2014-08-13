@@ -33,8 +33,8 @@ import com.byteslounge.cdi.resolver.bean.PropertyResolverBean;
 import com.byteslounge.cdi.utils.MessageUtils;
 
 /**
- * Checks if the CDI injection target has any field annotated with
- * {@link Property} and injects the respective resolved property accordingly.
+ * Checks if the CDI injection target has any fields annotated with
+ * {@link Property} and injects the respective resolved properties accordingly.
  * 
  * @author Gonçalo Marques
  * @since 1.0.0
