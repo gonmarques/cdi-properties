@@ -50,7 +50,7 @@ private String systemConfigurationMessage;
 
 ##Custom property resolution
 
-The extension already provides a default property resolver so the properties resolution is done **transparently**for the application.
+The extension already provides a default property resolver so the properties resolution is done **transparently** for the application.
 
 If a custom property resolution strategy is needed one may define a custom property resolver method:
 ```java
