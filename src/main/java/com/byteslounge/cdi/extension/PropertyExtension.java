@@ -48,7 +48,12 @@ public class PropertyExtension implements Extension {
     private AnnotatedMethod<?> providedResolverMethod = null;
 
     /**
-     * Scans any CDI managed bean for a property resolver method.
+     * Scans every CDI managed bean for a property resolver method. If no
+     * application provided resolver method is found, it will use the
+     * extension's default resolver method.
+     * 
+     * If the extension detects more than a single application provided resolver
+     * method it will throw an initialization exception.
      * 
      * @param pat
      *            The CDI managed type being scanned
