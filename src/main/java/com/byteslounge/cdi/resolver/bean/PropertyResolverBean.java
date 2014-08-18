@@ -157,7 +157,8 @@ public class PropertyResolverBean {
      * by the CDI container.
      * 
      * @param annotationClass
-     * @return
+     * @return The index of the parameter being checked. If the parameter is not
+     *         present in the property resolver method the method returns -1
      */
     private int checkResolverParameter(Class<? extends Annotation> annotationClass) {
         int index = 0;

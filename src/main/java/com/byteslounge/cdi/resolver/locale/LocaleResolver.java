@@ -26,7 +26,7 @@ public interface LocaleResolver {
     /**
      * Get the contextual {@link Locale}
      * 
-     * @return
+     * @return The contextual Locale
      */
     Locale getLocale();
 

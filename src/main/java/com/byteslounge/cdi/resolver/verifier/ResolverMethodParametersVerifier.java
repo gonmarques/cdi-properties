@@ -22,6 +22,9 @@ import javax.enterprise.context.SessionScoped;
 import javax.enterprise.inject.spi.AnnotatedMethod;
 import javax.enterprise.inject.spi.AnnotatedParameter;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.byteslounge.cdi.annotation.Property;
 import com.byteslounge.cdi.exception.ExtensionInitializationException;
 
@@ -37,6 +40,7 @@ public class ResolverMethodParametersVerifier implements ResolverMethodVerifier 
     private final AnnotatedMethod<?> propertyResolverMethod;
     private final int localeParameterIndex;
     private final int bundleNameParameterIndex;
+    private static final Logger logger = LoggerFactory.getLogger(ResolverMethodParametersVerifier.class);
 
     public ResolverMethodParametersVerifier(AnnotatedMethod<?> propertyResolverMethod, int localeParameterIndex, int bundleNameParameterIndex) {
         this.propertyResolverMethod = propertyResolverMethod;
@@ -80,6 +84,21 @@ public class ResolverMethodParametersVerifier implements ResolverMethodVerifier 
             if (annotation.annotationType().equals(SessionScoped.class) || annotation.annotationType().equals(RequestScoped.class)
                     || annotation.annotationType().equals(ApplicationScoped.class)) {
                 return false;
+            }
+            Class<?> viewScopedClass = null;
+            try {
+                // Account for JEE 7 @ViewScoped scope
+                viewScopedClass = Class.forName("javax.faces.view.ViewScoped");
+            } catch (Exception e) {
+                // JEE 6 environment
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Class javax.faces.view.ViewScoped was not found: Running in a Java EE 6 environment.");
+                }
+            }
+            if (viewScopedClass != null) {
+                if (annotation.annotationType().equals(viewScopedClass)) {
+                    return false;
+                }
             }
         }
         return true;

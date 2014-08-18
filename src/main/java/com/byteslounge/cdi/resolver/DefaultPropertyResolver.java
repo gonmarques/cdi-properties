@@ -47,7 +47,7 @@ public class DefaultPropertyResolver implements Serializable {
      *            property
      * @param key
      *            The property key to be resolved
-     * @return
+     * @return The resolved property
      */
     @PropertyResolver
     public String resolveProperty(@PropertyLocale Locale locale, @PropertyBundle String bundleName, String key) {
