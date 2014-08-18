@@ -16,7 +16,6 @@
 		<license>
 			<name>The Apache Software License, Version 2.0</name>
 			<url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
-			<distribution>repo</distribution>
 		</license>
 	</licenses>
 
@@ -28,7 +27,7 @@
 	</developers>
 
 	<scm>
-		<url>https://github.com/gonmarques/cdi-properties</url>
+		<url>https://github.com/gonmarques/cdi-properties.git</url>
 		<connection>scm:git:git://github.com/gonmarques/cdi-properties.git</connection>
 	</scm>
 
