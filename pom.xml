@@ -5,6 +5,7 @@
 	<groupId>com.byteslounge</groupId>
 	<artifactId>cdi-properties</artifactId>
 	<version>1.0.0-SNAPSHOT</version>
+	<packaging>jar</packaging>
 
 	<name>CDI Properties</name>
 	<description>A CDI extension that enables resource bundle injection and resolution in Java EE applications.</description>
@@ -15,6 +16,7 @@
 		<license>
 			<name>The Apache Software License, Version 2.0</name>
 			<url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+			<distribution>repo</distribution>
 		</license>
 	</licenses>
 
@@ -24,6 +26,11 @@
 			<name>Gonçalo Marques</name>
 		</developer>
 	</developers>
+
+	<scm>
+		<url>https://github.com/gonmarques/cdi-properties</url>
+		<connection>scm:git:git://github.com/gonmarques/cdi-properties.git</connection>
+	</scm>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -125,7 +132,7 @@
 		</dependencies>
 	</dependencyManagement>
 
-	<dependencies> 
+	<dependencies>
 		<!-- Test dependencies -->
 		<dependency>
 			<groupId>junit</groupId>
