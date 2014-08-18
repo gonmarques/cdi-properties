@@ -125,7 +125,7 @@
 		</dependencies>
 	</dependencyManagement>
 
-	<dependencies>
+	<dependencies> 
 		<!-- Test dependencies -->
 		<dependency>
 			<groupId>junit</groupId>
