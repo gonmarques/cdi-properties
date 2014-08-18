@@ -34,9 +34,11 @@ public enum ExtensionConfiguration {
     INSTANCE;
 
     private static final String EXTENSION_PROPERTIES_FILE = "CDIProperties.properties";
-    private static final Logger logger = LoggerFactory.getLogger(ExtensionConfiguration.class);
+    private Logger logger;
+    private String resourceBundleDefaultBaseName;
 
     private ExtensionConfiguration() {
+        logger = LoggerFactory.getLogger(ExtensionConfiguration.class);
         LocaleResolverFactory.setLocaleResolver(new StandaloneLocaleResolver());
         URL url = ExtensionConfiguration.class.getClassLoader().getResource(EXTENSION_PROPERTIES_FILE);
         if (url != null) {
@@ -49,8 +51,6 @@ public enum ExtensionConfiguration {
             }
         }
     }
-
-    private String resourceBundleDefaultBaseName;
 
     /**
      * Empty method to trigger the enum initialization.

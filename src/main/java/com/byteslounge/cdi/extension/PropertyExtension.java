@@ -96,6 +96,7 @@ public class PropertyExtension implements Extension {
     void afterDeploymentValidation(@Observes AfterDeploymentValidation adv, BeanManager beanManager) {
         propertyResolverBean.initializePropertyResolverBean();
         ExtensionConfiguration.INSTANCE.init();
+        logger.info("Configured property resolver method: " + MessageUtils.getMethodDefinition(resolverMethod));
     }
 
     /**
@@ -132,9 +133,6 @@ public class PropertyExtension implements Extension {
             throw new ExtensionInitializationException(errorMessage);
         }
         propertyResolverBean = new PropertyResolverBean(resolverMethod, beanManager);
-        if (logger.isDebugEnabled()) {
-            logger.info("Configured resolver method: " + MessageUtils.getMethodDefinition(resolverMethod));
-        }
     }
 
 }
