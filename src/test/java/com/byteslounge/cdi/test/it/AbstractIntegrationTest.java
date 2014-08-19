@@ -10,7 +10,13 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package com.byteslounge.cdi.test.configuration;
+package com.byteslounge.cdi.test.it;
+
+import java.io.File;
+
+import org.junit.Assert;
+
+import com.byteslounge.cdi.test.configuration.TestConstants;
 
 /**
  * Used in CDI Properties integration tests. See WarDefaultMethodIT.java,
@@ -20,18 +26,16 @@ package com.byteslounge.cdi.test.configuration;
  * @author Gonçalo Marques
  * @since 1.0.0
  */
-public class TestConstants {
+public abstract class AbstractIntegrationTest {
 
-    private TestConstants() {
+    protected static void checkPreRequisites() {
+        checkFileExists(TestConstants.SLF4J_API_JAR);
+        checkFileExists(TestConstants.SLF4J_JDK_IMPL_JAR);
     }
 
-    public static final String TESTING_URL = TestProperties.instance().getProperty("test.server.url");
-    public static final String OTHER_RESOURCE_BUNDLE_NAME = "bl.other";
-    public static final String SLF4J_API_JAR = TestProperties.instance().getProperty("slf4j.api");
-    public static final String SLF4J_JDK_IMPL_JAR = TestProperties.instance().getProperty("slf4j.jdk.impl");
-    public static final String BEAN_TEST_RETURN_VALUE = "getTextResult";
-    public static final String PROVIDED_RESOLVER_SUFFIX = "provided";
-    public static final String TEST_PROPERTIES_FILE = "test.properties";
-    public static final String PROJECT_VERSION = "project.version";
+    private static void checkFileExists(String filename) {
+        File file = new File(filename);
+        Assert.assertTrue("File " + filename + " must exist in the project root", file.exists());
+    }
 
 }

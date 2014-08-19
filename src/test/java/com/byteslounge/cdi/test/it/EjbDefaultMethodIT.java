@@ -31,6 +31,7 @@ import org.junit.runner.RunWith;
 
 import com.byteslounge.cdi.test.common.InjectedBean;
 import com.byteslounge.cdi.test.configuration.TestConstants;
+import com.byteslounge.cdi.test.configuration.TestProperties;
 import com.byteslounge.cdi.test.edm.ServiceEjbDefaultMethod;
 import com.byteslounge.cdi.test.edm.ServiceEjbDefaultMethodBean;
 import com.byteslounge.cdi.test.edm.TestEjbDefaultBean;
@@ -56,13 +57,15 @@ import com.thoughtworks.selenium.DefaultSelenium;
  * @since 1.0.0
  */
 @RunWith(Arquillian.class)
-public class EjbDefaultMethodIT {
+public class EjbDefaultMethodIT extends AbstractIntegrationTest {
 
     @Drone
     private DefaultSelenium client;
 
     @Deployment(name = "EAR", order = 1)
     public static Archive<?> createEnterpriseArchive() {
+
+        checkPreRequisites();
 
         Archive<?> ejbModule = ShrinkWrap.create(JavaArchive.class, "cdipropertiesejb.jar")
                 .addClasses(ServiceEjbDefaultMethod.class, ServiceEjbDefaultMethodBean.class, InjectedBean.class, EjbDefaultMethodIT.class, TestEntity.class)
@@ -78,8 +81,8 @@ public class EjbDefaultMethodIT {
         System.out.println("\n\n" + resourcesJar.toString(true) + "\n\n");
 
         Archive<?> ear = ShrinkWrap.create(EnterpriseArchive.class, "cdiproperties.ear").addAsModule(ejbModule).addAsLibrary(resourcesJar)
-                .addAsLibrary(new File("target/cdi-properties-1.0.0-SNAPSHOT.jar")).addAsLibrary(new File(TestConstants.SLF4J_API_JAR))
-                .addAsLibrary(new File(TestConstants.SLF4J_JDK_IMPL_JAR))
+                .addAsLibrary(new File("target/cdi-properties-" + TestProperties.instance().getProperty(TestConstants.PROJECT_VERSION) + ".jar"))
+                .addAsLibrary(new File(TestConstants.SLF4J_API_JAR)).addAsLibrary(new File(TestConstants.SLF4J_JDK_IMPL_JAR))
                 .addAsApplicationResource(new File("src/test/resources/assets/common/ejbCommon/application.xml"));
         System.out.println("\n\n" + ear.toString(true) + "\n\n");
         return ear;
@@ -87,6 +90,9 @@ public class EjbDefaultMethodIT {
 
     @Deployment(name = "WAR", order = 2)
     public static Archive<?> createWebArchive() {
+
+        checkPreRequisites();
+
         Archive<?> webMobule = ShrinkWrap.create(WebArchive.class, "cdipropertiestest.war")
                 .setWebXML(new File("src/test/resources/assets/common/ejbCommon/WEB-INF/web.xml")).addAsWebInfResource(EmptyAsset.INSTANCE, "beans.xml")
                 .addAsWebInfResource(new File("src/test/resources/assets/common/WEB-INF/faces-config.xml"))
@@ -100,7 +106,7 @@ public class EjbDefaultMethodIT {
     @Test
     @RunAsClient
     public void test() {
-        client.open(TestConstants.TESTING_URL + "/cditestejb.xhtml");
+        client.open(TestConstants.TESTING_URL + "/cdipropertiestest/cditestejb.xhtml");
         Assert.assertEquals(client.getText("xpath=//span[contains(@id, 'hello')]"),
                 MessageBundleUtils.resolveProperty("hello.world", "bl.messages", Locale.getDefault()));
         Assert.assertEquals(client.getText("xpath=//span[contains(@id, 'system')]"),

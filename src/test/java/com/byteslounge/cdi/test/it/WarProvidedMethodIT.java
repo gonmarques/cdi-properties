@@ -32,6 +32,7 @@ import com.byteslounge.cdi.test.common.DependentScopedBean;
 import com.byteslounge.cdi.test.common.InjectedBean;
 import com.byteslounge.cdi.test.common.TestBean;
 import com.byteslounge.cdi.test.configuration.TestConstants;
+import com.byteslounge.cdi.test.configuration.TestProperties;
 import com.byteslounge.cdi.test.model.TestEntity;
 import com.byteslounge.cdi.test.utils.MessageBundleUtils;
 import com.byteslounge.cdi.test.wpm.ProvidedMethodResolver;
@@ -62,19 +63,22 @@ import com.thoughtworks.selenium.DefaultSelenium;
  * @since 1.0.0
  */
 @RunWith(Arquillian.class)
-public class WarProvidedMethodIT {
+public class WarProvidedMethodIT extends AbstractIntegrationTest {
 
     @Drone
     private DefaultSelenium client;
 
     @Deployment
     public static Archive<?> createArchive() {
+
+        checkPreRequisites();
+
         Archive<?> webArchive = ShrinkWrap
                 .create(WebArchive.class, "cdipropertiestest.war")
                 .addAsWebInfResource(EmptyAsset.INSTANCE, "beans.xml")
                 .addAsWebInfResource(new File("src/test/resources/assets/common/test-persistence.xml"), "classes/META-INF/persistence.xml")
                 .addAsWebInfResource(new File("src/test/resources/assets/common/WEB-INF/faces-config.xml"))
-                .addAsLibrary(new File("target/cdi-properties-1.0.0-SNAPSHOT.jar"))
+                .addAsLibrary(new File("target/cdi-properties-" + TestProperties.instance().getProperty(TestConstants.PROJECT_VERSION) + ".jar"))
                 .addAsLibrary(new File(TestConstants.SLF4J_API_JAR))
                 .addAsLibrary(new File(TestConstants.SLF4J_JDK_IMPL_JAR))
                 .addAsWebInfResource(new File("src/test/resources/bl/messages.properties"), "classes/bl/messages.properties")
@@ -93,7 +97,7 @@ public class WarProvidedMethodIT {
     @Test
     @RunAsClient
     public void test() {
-        client.open(TestConstants.TESTING_URL + "/cditest.xhtml");
+        client.open(TestConstants.TESTING_URL + "/cdipropertiestest/cditest.xhtml");
         Assert.assertEquals(client.getText("xpath=//span[contains(@id, 'hello')]"),
                 MessageBundleUtils.resolveProperty("hello.world", "bl.messages", Locale.getDefault()) + TestConstants.PROVIDED_RESOLVER_SUFFIX);
         Assert.assertEquals(client.getText("xpath=//span[contains(@id, 'system')]"),
@@ -106,7 +110,7 @@ public class WarProvidedMethodIT {
                 MessageBundleUtils.resolveProperty("other.parameter", TestConstants.OTHER_RESOURCE_BUNDLE_NAME, Locale.getDefault(), "B")
                         + TestConstants.PROVIDED_RESOLVER_SUFFIX);
 
-        client.open(TestConstants.TESTING_URL + "/cditestpt.xhtml");
+        client.open(TestConstants.TESTING_URL + "/cdipropertiestest/cditestpt.xhtml");
         Assert.assertEquals(client.getText("xpath=//span[contains(@id, 'hello')]"),
                 MessageBundleUtils.resolveProperty("hello.world", "bl.messages", new Locale("pt")) + TestConstants.PROVIDED_RESOLVER_SUFFIX);
         Assert.assertEquals(client.getText("xpath=//span[contains(@id, 'system')]"),
