@@ -1,5 +1,7 @@
 #CDI Properties
 
+**Note**: CDI Properties includes a set of Arquillian based Integration Tests that cover the most common use case scenarios (from the simplest scenario to others that explore some degree of complexity). Detailed information about the included Integration Tests is available in the last section of this README file.
+
 ##Introduction
 
 CDI Properties is a CDI extension that enables resource bundle injection - and optional custom resource bundle resolution - in a CDI enabled Java EE application, requiring little to no configuration depending on the application requirements. The resource bundle source may be the typical `.properties` files or any other external resource or system.
@@ -19,7 +21,7 @@ Feel free to open new issues for bug reporting or enhancement requests.
 
 Will retrieve the property `hello.world` from the **default** resource bundle:
 ```java
-@Property(value = "hello.world")
+@Property("hello.world")
 private String helloWorld;
 ```
 
@@ -167,3 +169,41 @@ While the previous assumption may seem obvious, it should be noted that in Java 
 One possible workaround is to deploy the CDI Properties extension in a decompressed format, with its classes extracted inside the EJB module itself. Other workaround may consist in fetching the EJBs within the resolver method through JNDI lookups. This way we may fetch EJBs that are deployed inside EJB modules that are unreachable from the EAR library directory.
 
 The previous restrictions **do not apply** to web applications (WAR files). If the extension is used in a web application context, and the extension `jar` file is deployed in the `WEB-INF/lib` directory, if we define a custom property resolver method with extra injectable parameters, the parameter classes may be located anywhere within the WAR file (`WEB-INF/lib` or `WEB-INF/classes` directory or both).
+
+##Integration Tests
+
+CDI Properties includes Arquillian based Integration Tests (resorting to Arquillian Drone in order to automate front-end application testing) that cover the following use case scenarios:
+
+ - **JSF web based application (Extension's default property resolver method)**
+
+   - Single war module
+   - CDI bean supports two identical views, each one with its own `Locale`
+   - The extension injects properties into the CDI bean fields, which are presented in the views
+   - The extension's own default property resolver method is used
+
+ - **JSF web based application (Application provided custom property resolver method)**
+
+   - Single war module
+   - CDI bean supports two identical views, each one with its own `Locale`
+   - The extension injects properties into the CDI bean fields, which are presented in the views
+   - The application provides a custom property resolver method
+   - The resolver method contains additional parameters that are injected by the container. The parameters are CDI managed beans, each one with a distinct CDI bean scope
+   - An EJB is also injected as a parameter into the property resolver method. During property value resolution, the Integration Test persists (and reads) a testing entity to the underlying data store
+ 
+ - **EJB Module (Extension's default property resolver method)**
+
+   - EAR containing an EJB module is deployed to the container
+   - The extension's own default property resolver method is used
+   - Another application (web application) is deployed into the container
+   - The web application invokes a Remote EJB from the EJB module
+   - The extension injects properties into the fields of the Remote EJB which are presented in the web application
+   - The EJB persists (and reads) a test entity to the underlying data store before returning the information to the web application
+
+ - **EJB Module (Application provided custom property resolver method)**
+
+   - EAR containing an EJB module and a library JAR - containing the provided custom resolver method - is deployed to the container
+   - Another application (web application) is deployed into the container
+   - The web application invokes a Remote EJB from the EJB module
+   - The extension injects properties into the fields of the Remote EJB which are presented in the web application
+   - The provided property resolver method contains additional parameters that are injected by the container. The parameters are CDI managed beans
+   - While resolving the properties, the resolver method fetches another EJB from the EJB module via JNDI and invokes methods that persist and read data from an underlying data store
