@@ -2,6 +2,15 @@
 
 **Note**: CDI Properties includes a set of Arquillian based Integration Tests that cover the most common use case scenarios (from the simplest scenario to others that explore some degree of complexity). Detailed information about the included Integration Tests is available in the last section of this README file.
 
+**Maven Central Repository coordinates:**
+```xml
+<dependency>
+  <groupId>com.byteslounge</groupId>
+  <artifactId>cdi-properties</artifactId>
+  <version>1.0.0</version>
+</dependency>
+```
+
 ##Introduction
 
 CDI Properties is a CDI extension that enables resource bundle injection - and optional custom resource bundle resolution - in a CDI enabled Java EE application, requiring little to no configuration depending on the application requirements. The resource bundle source may be the typical `.properties` files or any other external resource or system.
