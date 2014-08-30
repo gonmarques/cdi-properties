@@ -10,30 +10,31 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package com.byteslounge.cdi.utils;
+package com.byteslounge.cdi.resolver;
 
-import javax.enterprise.inject.spi.AnnotatedMethod;
+import com.byteslounge.cdi.resolver.bean.PropertyResolverBean;
 
 /**
- * Utility class related with messages presented by the extension.
+ * Property resolver factory.
  * 
  * @author Gonçalo Marques
- * @since 1.0.0
+ * @since 1.1.0
  */
-public class MessageUtils {
+public class PropertyResolverFactory {
 
-    private MessageUtils() {
+    private PropertyResolverFactory() {
     }
 
     /**
-     * Builds a textual representation of an {@link AnnotatedMethod}
+     * Creates the default property resolver.
      * 
-     * @param method
-     *            The {@link AnnotatedMethod} instance
-     * @return A textual representation of the {@link AnnotatedMethod}
+     * @param propertyResolverBean
+     *            Bean that holds a reference to the actual property resolver
+     *            instance
+     * @return The default property resolver
      */
-    public static String getMethodDefinition(AnnotatedMethod<?> method) {
-        return method.getJavaMember().getDeclaringClass().getName() + "." + method.getJavaMember().getName() + "()";
+    public static PropertyResolver getInstance(PropertyResolverBean propertyResolverBean) {
+        return new DefaultPropertyResolver(propertyResolverBean);
     }
 
 }

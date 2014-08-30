@@ -32,7 +32,7 @@ import org.slf4j.LoggerFactory;
 
 import com.byteslounge.cdi.annotation.PropertyBundle;
 import com.byteslounge.cdi.annotation.PropertyLocale;
-import com.byteslounge.cdi.resolver.PropertyResolverParameter;
+import com.byteslounge.cdi.extension.PropertyResolverParameter;
 import com.byteslounge.cdi.resolver.locale.LocaleResolverFactory;
 import com.byteslounge.cdi.resolver.verifier.ParameterIndexVerifier;
 import com.byteslounge.cdi.resolver.verifier.ResolverMethodParametersVerifier;

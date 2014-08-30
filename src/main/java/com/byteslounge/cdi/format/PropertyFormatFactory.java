@@ -10,30 +10,25 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package com.byteslounge.cdi.utils;
-
-import javax.enterprise.inject.spi.AnnotatedMethod;
+package com.byteslounge.cdi.format;
 
 /**
- * Utility class related with messages presented by the extension.
+ * Resolved properties formatter factory.
  * 
  * @author Gonçalo Marques
- * @since 1.0.0
+ * @since 1.1.0
  */
-public class MessageUtils {
+public class PropertyFormatFactory {
 
-    private MessageUtils() {
+    private PropertyFormatFactory() {
     }
 
     /**
-     * Builds a textual representation of an {@link AnnotatedMethod}
+     * Creates the default resolved properties formatter
      * 
-     * @param method
-     *            The {@link AnnotatedMethod} instance
-     * @return A textual representation of the {@link AnnotatedMethod}
+     * @return The default resolved properties formatter
      */
-    public static String getMethodDefinition(AnnotatedMethod<?> method) {
-        return method.getJavaMember().getDeclaringClass().getName() + "." + method.getJavaMember().getName() + "()";
+    public static PropertyFormat getInstance() {
+        return new DefaultPropertyFormat();
     }
-
 }

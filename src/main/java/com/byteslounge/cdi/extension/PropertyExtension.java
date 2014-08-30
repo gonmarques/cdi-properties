@@ -29,8 +29,10 @@ import com.byteslounge.cdi.annotation.Property;
 import com.byteslounge.cdi.annotation.PropertyResolver;
 import com.byteslounge.cdi.configuration.ExtensionConfiguration;
 import com.byteslounge.cdi.exception.ExtensionInitializationException;
-import com.byteslounge.cdi.resolver.DefaultPropertyResolver;
-import com.byteslounge.cdi.resolver.PropertyResolverInjectionTarget;
+import com.byteslounge.cdi.format.PropertyFormat;
+import com.byteslounge.cdi.format.PropertyFormatFactory;
+import com.byteslounge.cdi.resolver.DefaultPropertyResolverMethod;
+import com.byteslounge.cdi.resolver.PropertyResolverFactory;
 import com.byteslounge.cdi.resolver.bean.PropertyResolverBean;
 import com.byteslounge.cdi.utils.MessageUtils;
 
@@ -64,7 +66,7 @@ public class PropertyExtension implements Extension {
 
         for (AnnotatedMethod<?> method : at.getMethods()) {
             if (method.isAnnotationPresent(PropertyResolver.class)) {
-                if (method.getJavaMember().getDeclaringClass().equals(DefaultPropertyResolver.class)) {
+                if (method.getJavaMember().getDeclaringClass().equals(DefaultPropertyResolverMethod.class)) {
                     resolverMethod = method;
                     if (logger.isDebugEnabled()) {
                         logger.debug("Found default resolver method: " + MessageUtils.getMethodDefinition(method));
@@ -114,7 +116,9 @@ public class PropertyExtension implements Extension {
         }
         InjectionTarget<T> it = pit.getInjectionTarget();
         AnnotatedType<T> at = pit.getAnnotatedType();
-        pit.setInjectionTarget(new PropertyResolverInjectionTarget<T>(it, at, propertyResolverBean));
+        com.byteslounge.cdi.resolver.PropertyResolver propertyResolver = PropertyResolverFactory.getInstance(propertyResolverBean);
+        PropertyFormat propertyFormat = PropertyFormatFactory.getInstance();
+        pit.setInjectionTarget(new PropertyResolverInjectionTarget<T>(it, at, propertyResolver, propertyFormat));
     }
 
     /**

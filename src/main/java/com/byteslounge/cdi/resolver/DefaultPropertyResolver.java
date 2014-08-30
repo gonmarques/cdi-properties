@@ -12,60 +12,37 @@
  */
 package com.byteslounge.cdi.resolver;
 
-import java.io.Serializable;
-import java.util.Locale;
-import java.util.ResourceBundle;
+import java.lang.reflect.InvocationTargetException;
 
-import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.spi.CreationalContext;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.byteslounge.cdi.annotation.PropertyBundle;
-import com.byteslounge.cdi.annotation.PropertyLocale;
-import com.byteslounge.cdi.annotation.PropertyResolver;
+import com.byteslounge.cdi.resolver.bean.PropertyResolverBean;
 
 /**
  * The default property resolver.
  * 
  * @author Gonçalo Marques
- * @since 1.0.0
+ * @since 1.1.0
  */
-@ApplicationScoped
-public class DefaultPropertyResolver implements Serializable {
+public class DefaultPropertyResolver implements PropertyResolver {
 
     private static final long serialVersionUID = 1L;
-    private static final Logger logger = LoggerFactory.getLogger(DefaultPropertyResolver.class);
+    private final PropertyResolverBean propertyResolverBean;
+
+    public DefaultPropertyResolver(PropertyResolverBean propertyResolverBean) {
+        this.propertyResolverBean = propertyResolverBean;
+    }
 
     /**
-     * The default property resolver method.
-     * 
-     * @param locale
-     *            The locale which should be used to resolve the property
-     * @param bundleName
-     *            The resource bundle name which should be used to resolve the
-     *            property
-     * @param key
-     *            The property key to be resolved
-     * @return The resolved property
+     * See {@link PropertyResolver#resolve(String, String, CreationalContext)}
      */
-    @PropertyResolver
-    public String resolveProperty(@PropertyLocale Locale locale, @PropertyBundle String bundleName, String key) {
-        if (logger.isDebugEnabled()) {
-            logger.debug("Resolving property. Locale " + locale.toString() + ", bundle: " + bundleName + ", key: " + key);
+    @Override
+    public String resolve(String key, String bundleName, CreationalContext<?> ctx) {
+        try {
+            return propertyResolverBean.resolveProperty(key, bundleName, ctx);
+        } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+            throw new RuntimeException("Could not resolve property", e);
         }
-        ResourceBundle bundle = ResourceBundle.getBundle(bundleName, locale);
-        String value = bundle.getString(key);
-        if (value != null) {
-            if (logger.isDebugEnabled()) {
-                logger.debug("Property [" + key + "] resolved to: " + value);
-            }
-            return value;
-        }
-        if (logger.isDebugEnabled()) {
-            logger.debug("Could not resolve property: " + key);
-        }
-        return key;
     }
 
 }
