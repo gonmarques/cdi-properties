@@ -13,12 +13,16 @@
 package com.byteslounge.cdi.test.it;
 
 import java.io.File;
+import java.io.IOException;
+import java.net.URL;
 import java.util.Locale;
 
 import org.jboss.arquillian.container.test.api.Deployment;
+import org.jboss.arquillian.container.test.api.OperateOnDeployment;
 import org.jboss.arquillian.container.test.api.RunAsClient;
 import org.jboss.arquillian.drone.api.annotation.Drone;
 import org.jboss.arquillian.junit.Arquillian;
+import org.jboss.arquillian.test.api.ArquillianResource;
 import org.jboss.shrinkwrap.api.Archive;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.asset.EmptyAsset;
@@ -28,16 +32,12 @@ import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.FindBy;
 
-import com.byteslounge.cdi.test.common.InjectedBean;
 import com.byteslounge.cdi.test.configuration.TestConstants;
-import com.byteslounge.cdi.test.configuration.TestProperties;
-import com.byteslounge.cdi.test.edm.ServiceEjbDefaultMethod;
-import com.byteslounge.cdi.test.edm.ServiceEjbDefaultMethodBean;
-import com.byteslounge.cdi.test.edm.TestEjbDefaultBean;
-import com.byteslounge.cdi.test.model.TestEntity;
 import com.byteslounge.cdi.test.utils.MessageBundleUtils;
-import com.thoughtworks.selenium.DefaultSelenium;
 
 /**
  * Integration test covering the following scenario:
@@ -60,16 +60,35 @@ import com.thoughtworks.selenium.DefaultSelenium;
 public class EjbDefaultMethodIT extends AbstractIntegrationTest {
 
     @Drone
-    private DefaultSelenium client;
+    private WebDriver browser;
+
+    @FindBy(id = "hello")
+    private WebElement hello;
+
+    @FindBy(id = "system")
+    private WebElement system;
+
+    @FindBy(id = "other")
+    private WebElement other;
+
+    @FindBy(id = "otherabc")
+    private WebElement otherAbc;
 
     @Deployment(name = "EAR", order = 1)
-    public static Archive<?> createEnterpriseArchive() {
+    public static Archive<?> createEnterpriseArchive() throws IOException {
 
-        checkPreRequisites();
+        prepareClasses();
 
-        Archive<?> ejbModule = ShrinkWrap.create(JavaArchive.class, "cdipropertiesejb.jar")
-                .addClasses(ServiceEjbDefaultMethod.class, ServiceEjbDefaultMethodBean.class, InjectedBean.class, EjbDefaultMethodIT.class, TestEntity.class)
-                .addAsResource(EmptyAsset.INSTANCE, "META-INF/beans.xml")
+        Archive<?> ejbModule = ShrinkWrap
+                .create(JavaArchive.class, "cdipropertiesejb.jar")
+                .addAsResource(new File(TestConstants.EXTERNAL_CLASSES_DIRECTORY + "/com/byteslounge/cdi/test/edm/ServiceEjbDefaultMethod.class"),
+                        "com/byteslounge/cdi/test/edm/ServiceEjbDefaultMethod.class")
+                .addAsResource(new File(TestConstants.EXTERNAL_CLASSES_DIRECTORY + "/com/byteslounge/cdi/test/edm/ServiceEjbDefaultMethodBean.class"),
+                        "com/byteslounge/cdi/test/edm/ServiceEjbDefaultMethodBean.class")
+                .addAsResource(new File(TestConstants.EXTERNAL_CLASSES_DIRECTORY + "/com/byteslounge/cdi/test/common/InjectedBean.class"),
+                        "com/byteslounge/cdi/test/common/InjectedBean.class")
+                .addAsResource(new File(TestConstants.EXTERNAL_CLASSES_DIRECTORY + "/com/byteslounge/cdi/test/model/TestEntity.class"),
+                        "com/byteslounge/cdi/test/model/TestEntity.class").addAsResource(EmptyAsset.INSTANCE, "META-INF/beans.xml")
                 .addAsResource(new File("src/test/resources/assets/common/test-persistence.xml"), "META-INF/persistence.xml");
         System.out.println("\n\n" + ejbModule.toString(true) + "\n\n");
 
@@ -81,39 +100,42 @@ public class EjbDefaultMethodIT extends AbstractIntegrationTest {
         System.out.println("\n\n" + resourcesJar.toString(true) + "\n\n");
 
         Archive<?> ear = ShrinkWrap.create(EnterpriseArchive.class, "cdiproperties.ear").addAsModule(ejbModule).addAsLibrary(resourcesJar)
-                .addAsLibrary(new File("target/cdi-properties-" + TestProperties.instance().getProperty(TestConstants.PROJECT_VERSION) + ".jar"))
-                .addAsLibrary(new File(TestConstants.SLF4J_API_JAR)).addAsLibrary(new File(TestConstants.SLF4J_JDK_IMPL_JAR))
+                .addAsLibrary(new File("target/cdi-properties-" + System.getProperty("project.version") + ".jar"))
                 .addAsApplicationResource(new File("src/test/resources/assets/common/ejbCommon/application.xml"));
         System.out.println("\n\n" + ear.toString(true) + "\n\n");
         return ear;
     }
 
     @Deployment(name = "WAR", order = 2)
-    public static Archive<?> createWebArchive() {
+    public static Archive<?> createWebArchive() throws IOException {
 
-        checkPreRequisites();
+        prepareClasses();
 
-        Archive<?> webMobule = ShrinkWrap.create(WebArchive.class, "cdipropertiestest.war")
-                .setWebXML(new File("src/test/resources/assets/common/ejbCommon/WEB-INF/web.xml")).addAsWebInfResource(EmptyAsset.INSTANCE, "beans.xml")
+        Archive<?> webMobule = ShrinkWrap
+                .create(WebArchive.class, "cdipropertiestest.war")
+                .setWebXML(new File("src/test/resources/assets/common/ejbCommon/WEB-INF/web.xml"))
+                .addAsWebInfResource(EmptyAsset.INSTANCE, "beans.xml")
                 .addAsWebInfResource(new File("src/test/resources/assets/common/WEB-INF/faces-config.xml"))
                 .addAsWebResource(new File("src/test/resources/assets/common/ejbCommon/webapp/cditestejb.xhtml"))
-                .addClasses(TestEjbDefaultBean.class, InjectedBean.class, ServiceEjbDefaultMethod.class).addAsLibrary(new File(TestConstants.SLF4J_API_JAR))
-                .addAsLibrary(new File(TestConstants.SLF4J_JDK_IMPL_JAR));
+                .addAsWebInfResource(new File(TestConstants.EXTERNAL_CLASSES_DIRECTORY + "/com/byteslounge/cdi/test/edm/TestEjbDefaultBean.class"),
+                        "classes/com/byteslounge/cdi/test/edm/TestEjbDefaultBean.class")
+                .addAsWebInfResource(new File(TestConstants.EXTERNAL_CLASSES_DIRECTORY + "/com/byteslounge/cdi/test/common/InjectedBean.class"),
+                        "classes/com/byteslounge/cdi/test/common/InjectedBean.class")
+                .addAsWebInfResource(new File(TestConstants.EXTERNAL_CLASSES_DIRECTORY + "/com/byteslounge/cdi/test/edm/ServiceEjbDefaultMethod.class"),
+                        "classes/com/byteslounge/cdi/test/edm/ServiceEjbDefaultMethod.class");
         System.out.println("\n\n" + webMobule.toString(true) + "\n\n");
         return webMobule;
     }
 
     @Test
     @RunAsClient
-    public void test() {
-        client.open(TestConstants.TESTING_URL + "/cdipropertiestest/cditestejb.xhtml");
-        Assert.assertEquals(client.getText("xpath=//span[contains(@id, 'hello')]"),
-                MessageBundleUtils.resolveProperty("hello.world", "bl.messages", Locale.getDefault()));
-        Assert.assertEquals(client.getText("xpath=//span[contains(@id, 'system')]"),
-                MessageBundleUtils.resolveProperty("system.linux.box", "bl.messages", Locale.getDefault(), "Linux", "16"));
-        Assert.assertEquals(client.getText("xpath=//span[contains(@id, 'other')]"),
-                MessageBundleUtils.resolveProperty("other.message", TestConstants.OTHER_RESOURCE_BUNDLE_NAME, Locale.getDefault()));
-        Assert.assertEquals(client.getText("xpath=//span[contains(@id, 'otherabc')]"),
+    @OperateOnDeployment("WAR")
+    public void test(@ArquillianResource URL contextPath) {
+        browser.get(contextPath + "cditestejb.xhtml");
+        Assert.assertEquals(hello.getText(), MessageBundleUtils.resolveProperty("hello.world", "bl.messages", Locale.getDefault()));
+        Assert.assertEquals(system.getText(), MessageBundleUtils.resolveProperty("system.linux.box", "bl.messages", Locale.getDefault(), "Linux", "16"));
+        Assert.assertEquals(other.getText(), MessageBundleUtils.resolveProperty("other.message", TestConstants.OTHER_RESOURCE_BUNDLE_NAME, Locale.getDefault()));
+        Assert.assertEquals(otherAbc.getText(),
                 MessageBundleUtils.resolveProperty("other.parameter", TestConstants.OTHER_RESOURCE_BUNDLE_NAME, Locale.getDefault(), "B"));
 
     }

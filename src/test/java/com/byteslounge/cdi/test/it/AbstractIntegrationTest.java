@@ -13,8 +13,7 @@
 package com.byteslounge.cdi.test.it;
 
 import java.io.File;
-
-import org.junit.Assert;
+import java.io.IOException;
 
 import com.byteslounge.cdi.test.configuration.TestConstants;
 
@@ -28,14 +27,33 @@ import com.byteslounge.cdi.test.configuration.TestConstants;
  */
 public abstract class AbstractIntegrationTest {
 
-    protected static void checkPreRequisites() {
-        checkFileExists(TestConstants.SLF4J_API_JAR);
-        checkFileExists(TestConstants.SLF4J_JDK_IMPL_JAR);
+    /**
+     * Glassfish embedded will also include the classpath of the test
+     * application itself.
+     * 
+     * In order to make sure that the classes deployed through Arquillian are
+     * exclusively loaded by the glassfish application classloader, we remove
+     * them form the test classpath and move them into an external directory
+     * 
+     * @throws IOException
+     */
+    static void prepareClasses() throws IOException {
+        File file = new File(TestConstants.TEST_TARGET_CLASSES_DIRECTORY + "/com/byteslounge/cdi/test/common/TestBean.class");
+        if (file.exists()) {
+            processDirectory("common");
+            processDirectory("wpm");
+            processDirectory("model");
+            processDirectory("edm");
+            processDirectory("epm");
+        }
     }
 
-    private static void checkFileExists(String filename) {
-        File file = new File(filename);
-        Assert.assertTrue("File " + filename + " must exist in the project root", file.exists());
+    private static void processDirectory(String directory) {
+        File targetDir = new File(TestConstants.EXTERNAL_CLASSES_DIRECTORY + "/com/byteslounge/cdi/test/" + directory);
+        targetDir.mkdirs();
+        for (File file : new File(TestConstants.TEST_TARGET_CLASSES_DIRECTORY + "/com/byteslounge/cdi/test/" + directory).listFiles()) {
+            file.renameTo(new File(TestConstants.EXTERNAL_CLASSES_DIRECTORY + "/com/byteslounge/cdi/test/" + directory + "/" + file.getName()));
+        }
     }
 
 }

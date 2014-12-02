@@ -25,13 +25,10 @@ public class TestConstants {
     private TestConstants() {
     }
 
-    public static final String TESTING_URL = TestProperties.instance().getProperty("test.server.url");
     public static final String OTHER_RESOURCE_BUNDLE_NAME = "bl.other";
-    public static final String SLF4J_API_JAR = TestProperties.instance().getProperty("slf4j.api");
-    public static final String SLF4J_JDK_IMPL_JAR = TestProperties.instance().getProperty("slf4j.jdk.impl");
     public static final String BEAN_TEST_RETURN_VALUE = "getTextResult";
     public static final String PROVIDED_RESOLVER_SUFFIX = "provided";
-    public static final String TEST_PROPERTIES_FILE = "test.properties";
-    public static final String PROJECT_VERSION = "project.version";
+    public static final String EXTERNAL_CLASSES_DIRECTORY = "target/external";
+    public static final String TEST_TARGET_CLASSES_DIRECTORY = "target/test-classes";
 
 }

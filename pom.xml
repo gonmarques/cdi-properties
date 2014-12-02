@@ -38,25 +38,26 @@
 		<slf4j-api.version>1.7.5</slf4j-api.version>
 		<junit.version>4.11</junit.version>
 		<arquillian-junit-container.version>1.1.5.Final</arquillian-junit-container.version>
-		<arquillian-glassfish-remote.version>1.0.0.CR4</arquillian-glassfish-remote.version>
+		<arquillian-glassfish-embedded.version>1.0.0.CR4</arquillian-glassfish-embedded.version>
+		<glassfish-embedded.version>4.1</glassfish-embedded.version>
 		<arquillian-drone-bom.version>1.3.1.Final</arquillian-drone-bom.version>
 		<maven-compiler.version>3.1</maven-compiler.version>
 		<maven-resources.version>2.4</maven-resources.version>
 		<maven-failsafe-plugin.version>2.11</maven-failsafe-plugin.version>
-		<slf4j-jdk14.version>1.7.7</slf4j-jdk14.version>
-		<skipTests>true</skipTests>
+		<graphene-webdriver.version>2.0.3.Final</graphene-webdriver.version>
+		<h2.version>1.3.173</h2.version>
 	</properties>
 
 	<profiles>
 		<profile>
-			<id>ExecuteTests</id>
+			<id>SkipTests</id>
 			<activation>
 				<property>
-					<name>executeTests</name>
+					<name>skipTests</name>
 				</property>
 			</activation>
 			<properties>
-				<skipTests>false</skipTests>
+				<skipTests>true</skipTests>
 			</properties>
 		</profile>
 	</profiles>
@@ -84,21 +85,22 @@
 				<artifactId>maven-failsafe-plugin</artifactId>
 				<version>${maven-failsafe-plugin.version}</version>
 				<configuration>
+					<systemPropertyVariables>
+						<project.version>${project.version}</project.version>
+					</systemPropertyVariables>
 					<skipTests>${skipTests}</skipTests>
-					<argLine>-Xmx2048m -XX:MaxPermSize=256m</argLine>
+					<argLine>-Xmx512m -XX:MaxPermSize=256m</argLine>
 					<printSummary>true</printSummary>
 					<redirectTestOutputToFile>true</redirectTestOutputToFile>
 					<parallel>none</parallel>
 					<forkCount>0</forkCount>
 					<threadCount>1</threadCount>
-					<classpathDependencyExcludes>
-						<classpathDependencyExcludes>javax:javaee-api</classpathDependencyExcludes>
-					</classpathDependencyExcludes>
-					<systemPropertyVariables>
-						<java.util.logging.config.file>
-							${project.build.testOutputDirectory}/logging.properties
-						</java.util.logging.config.file>
-					</systemPropertyVariables>
+					<!-- 
+					Dummy classes folder in order to make sure that none of the source 
+					project classes are included in the test (and consequently Glassfish embedded) classpath.
+					This way Glassfish will only load artifacts explicitly deployed via Arquillian
+					-->
+					<classesDirectory>dummy</classesDirectory>
 				</configuration>
 				<executions>
 					<execution>
@@ -130,9 +132,6 @@
 			<testResource>
 				<directory>src/test/resources</directory>
 				<filtering>true</filtering>
-				<includes>
-					<include>**/*.properties</include>
-				</includes>
 			</testResource>
 		</testResources>
 	</build>
@@ -150,13 +149,14 @@
 	</dependencyManagement>
 
 	<dependencies>
-		<!-- Test dependencies -->
+	
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
 			<version>${junit.version}</version>
 			<scope>test</scope>
 		</dependency>
+		
 		<dependency>
 			<groupId>org.jboss.arquillian.junit</groupId>
 			<artifactId>arquillian-junit-container</artifactId>
@@ -165,19 +165,29 @@
 		</dependency>
 		<dependency>
 			<groupId>org.jboss.arquillian.container</groupId>
-			<artifactId>arquillian-glassfish-remote-3.1</artifactId>
-			<version>${arquillian-glassfish-remote.version}</version>
+			<artifactId>arquillian-glassfish-embedded-3.1</artifactId>
+			<version>${arquillian-glassfish-embedded.version}</version>
 			<scope>test</scope>
 			<exclusions>
 				<exclusion>
-					<artifactId>shrinkwrap-descriptors-api-base</artifactId>
-					<groupId>org.jboss.shrinkwrap.descriptors</groupId>
+					<artifactId>shrinkwrap-api</artifactId>
+					<groupId>org.jboss.shrinkwrap</groupId>
 				</exclusion>
 				<exclusion>
 					<artifactId>arquillian-container-spi</artifactId>
 					<groupId>org.jboss.arquillian.container</groupId>
 				</exclusion>
+				<exclusion>
+					<artifactId>shrinkwrap-descriptors-spi</artifactId>
+					<groupId>org.jboss.shrinkwrap.descriptors</groupId>
+				</exclusion>
 			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>org.glassfish.main.extras</groupId>
+			<artifactId>glassfish-embedded-all</artifactId>
+			<version>${glassfish-embedded.version}</version>
+			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.jboss.arquillian.extension</groupId>
@@ -218,6 +228,28 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
+		
+		<dependency>
+		    <groupId>org.jboss.arquillian.graphene</groupId>
+		    <artifactId>graphene-webdriver</artifactId>
+		    <version>${graphene-webdriver.version}</version>
+		    <type>pom</type>
+		    <scope>test</scope>
+		</dependency>
+		
+		<dependency>
+			<groupId>com.h2database</groupId>
+			<artifactId>h2</artifactId>
+			<version>${h2.version}</version>
+			<scope>test</scope>
+		</dependency>
+		
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-jdk14</artifactId>
+			<version>${slf4j-api.version}</version>
+			<scope>test</scope>
+		</dependency>
 
 		<dependency>
 			<groupId>javax</groupId>
@@ -225,6 +257,7 @@
 			<version>${javaee-api.version}</version>
 			<scope>provided</scope>
 		</dependency>
+		
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>

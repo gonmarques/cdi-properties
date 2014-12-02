@@ -13,12 +13,15 @@
 package com.byteslounge.cdi.test.it;
 
 import java.io.File;
+import java.io.IOException;
+import java.net.URL;
 import java.util.Locale;
 
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.container.test.api.RunAsClient;
 import org.jboss.arquillian.drone.api.annotation.Drone;
 import org.jboss.arquillian.junit.Arquillian;
+import org.jboss.arquillian.test.api.ArquillianResource;
 import org.jboss.shrinkwrap.api.Archive;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.asset.EmptyAsset;
@@ -26,21 +29,12 @@ import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.FindBy;
 
-import com.byteslounge.cdi.test.common.ApplicationScopedBean;
-import com.byteslounge.cdi.test.common.DependentScopedBean;
-import com.byteslounge.cdi.test.common.InjectedBean;
-import com.byteslounge.cdi.test.common.TestBean;
 import com.byteslounge.cdi.test.configuration.TestConstants;
-import com.byteslounge.cdi.test.configuration.TestProperties;
-import com.byteslounge.cdi.test.model.TestEntity;
 import com.byteslounge.cdi.test.utils.MessageBundleUtils;
-import com.byteslounge.cdi.test.wpm.ProvidedMethodResolver;
-import com.byteslounge.cdi.test.wpm.RequestScopedBean;
-import com.byteslounge.cdi.test.wpm.Service;
-import com.byteslounge.cdi.test.wpm.ServiceBean;
-import com.byteslounge.cdi.test.wpm.SessionScopedBean;
-import com.thoughtworks.selenium.DefaultSelenium;
 
 /**
  * Integration test covering the following scenario:
@@ -66,21 +60,31 @@ import com.thoughtworks.selenium.DefaultSelenium;
 public class WarProvidedMethodIT extends AbstractIntegrationTest {
 
     @Drone
-    private DefaultSelenium client;
+    private WebDriver browser;
+
+    @FindBy(id = "hello")
+    private WebElement hello;
+
+    @FindBy(id = "system")
+    private WebElement system;
+
+    @FindBy(id = "other")
+    private WebElement other;
+
+    @FindBy(id = "otherabc")
+    private WebElement otherAbc;
 
     @Deployment
-    public static Archive<?> createArchive() {
+    public static Archive<?> createArchive() throws IOException {
 
-        checkPreRequisites();
+        prepareClasses();
 
         Archive<?> webArchive = ShrinkWrap
                 .create(WebArchive.class, "cdipropertiestest.war")
                 .addAsWebInfResource(EmptyAsset.INSTANCE, "beans.xml")
                 .addAsWebInfResource(new File("src/test/resources/assets/common/test-persistence.xml"), "classes/META-INF/persistence.xml")
                 .addAsWebInfResource(new File("src/test/resources/assets/common/WEB-INF/faces-config.xml"))
-                .addAsLibrary(new File("target/cdi-properties-" + TestProperties.instance().getProperty(TestConstants.PROJECT_VERSION) + ".jar"))
-                .addAsLibrary(new File(TestConstants.SLF4J_API_JAR))
-                .addAsLibrary(new File(TestConstants.SLF4J_JDK_IMPL_JAR))
+                .addAsLibrary(new File("target/cdi-properties-" + System.getProperty("project.version") + ".jar"))
                 .addAsWebInfResource(new File("src/test/resources/bl/messages.properties"), "classes/bl/messages.properties")
                 .addAsWebInfResource(new File("src/test/resources/bl/messages_pt.properties"), "classes/bl/messages_pt.properties")
                 .addAsWebInfResource(new File("src/test/resources/bl/other.properties"), "classes/bl/other.properties")
@@ -88,37 +92,53 @@ public class WarProvidedMethodIT extends AbstractIntegrationTest {
                 .setWebXML(new File("src/test/resources/assets/warCommon/WEB-INF/web.xml"))
                 .addAsWebResource(new File("src/test/resources/assets/warCommon/webapp/cditest.xhtml"))
                 .addAsWebResource(new File("src/test/resources/assets/warCommon/webapp/cditestpt.xhtml"))
-                .addClasses(TestBean.class, WarProvidedMethodIT.class, InjectedBean.class, ApplicationScopedBean.class, DependentScopedBean.class,
-                        ProvidedMethodResolver.class, RequestScopedBean.class, SessionScopedBean.class, Service.class, ServiceBean.class, TestEntity.class);
+                .addAsWebInfResource(new File(TestConstants.EXTERNAL_CLASSES_DIRECTORY + "/com/byteslounge/cdi/test/common/TestBean.class"),
+                        "classes/com/byteslounge/cdi/test/common/TestBean.class")
+                .addAsWebInfResource(new File(TestConstants.EXTERNAL_CLASSES_DIRECTORY + "/com/byteslounge/cdi/test/common/InjectedBean.class"),
+                        "classes/com/byteslounge/cdi/test/common/InjectedBean.class")
+                .addAsWebInfResource(new File(TestConstants.EXTERNAL_CLASSES_DIRECTORY + "/com/byteslounge/cdi/test/common/ApplicationScopedBean.class"),
+                        "classes/com/byteslounge/cdi/test/common/ApplicationScopedBean.class")
+                .addAsWebInfResource(new File(TestConstants.EXTERNAL_CLASSES_DIRECTORY + "/com/byteslounge/cdi/test/common/DependentScopedBean.class"),
+                        "classes/com/byteslounge/cdi/test/common/DependentScopedBean.class")
+                .addAsWebInfResource(new File(TestConstants.EXTERNAL_CLASSES_DIRECTORY + "/com/byteslounge/cdi/test/wpm/ProvidedMethodResolver.class"),
+                        "classes/com/byteslounge/cdi/test/wpm/ProvidedMethodResolver.class")
+                .addAsWebInfResource(new File(TestConstants.EXTERNAL_CLASSES_DIRECTORY + "/com/byteslounge/cdi/test/wpm/RequestScopedBean.class"),
+                        "classes/com/byteslounge/cdi/test/wpm/RequestScopedBean.class")
+                .addAsWebInfResource(new File(TestConstants.EXTERNAL_CLASSES_DIRECTORY + "/com/byteslounge/cdi/test/wpm/SessionScopedBean.class"),
+                        "classes/com/byteslounge/cdi/test/wpm/SessionScopedBean.class")
+                .addAsWebInfResource(new File(TestConstants.EXTERNAL_CLASSES_DIRECTORY + "/com/byteslounge/cdi/test/wpm/Service.class"),
+                        "classes/com/byteslounge/cdi/test/wpm/Service.class")
+                .addAsWebInfResource(new File(TestConstants.EXTERNAL_CLASSES_DIRECTORY + "/com/byteslounge/cdi/test/wpm/ServiceBean.class"),
+                        "classes/com/byteslounge/cdi/test/wpm/ServiceBean.class")
+                .addAsWebInfResource(new File(TestConstants.EXTERNAL_CLASSES_DIRECTORY + "/com/byteslounge/cdi/test/model/TestEntity.class"),
+                        "classes/com/byteslounge/cdi/test/model/TestEntity.class")
+                .addAsWebInfResource(new File("src/test/resources/assets/resources/logging.properties"), "classes/logging.properties");
         System.out.println("\n\n" + webArchive.toString(true) + "\n\n");
         return webArchive;
     }
 
     @Test
     @RunAsClient
-    public void test() {
-        client.open(TestConstants.TESTING_URL + "/cdipropertiestest/cditest.xhtml");
-        Assert.assertEquals(client.getText("xpath=//span[contains(@id, 'hello')]"),
-                MessageBundleUtils.resolveProperty("hello.world", "bl.messages", Locale.getDefault()) + TestConstants.PROVIDED_RESOLVER_SUFFIX);
-        Assert.assertEquals(client.getText("xpath=//span[contains(@id, 'system')]"),
-                MessageBundleUtils.resolveProperty("system.linux.box", "bl.messages", Locale.getDefault(), "Linux", "16")
-                        + TestConstants.PROVIDED_RESOLVER_SUFFIX);
-        Assert.assertEquals(client.getText("xpath=//span[contains(@id, 'other')]"),
-                MessageBundleUtils.resolveProperty("other.message", TestConstants.OTHER_RESOURCE_BUNDLE_NAME, Locale.getDefault())
-                        + TestConstants.PROVIDED_RESOLVER_SUFFIX);
-        Assert.assertEquals(client.getText("xpath=//span[contains(@id, 'otherabc')]"),
+    public void test(@ArquillianResource URL contextPath) {
+        browser.get(contextPath + "cditest.xhtml");
+        Assert.assertEquals(hello.getText(), MessageBundleUtils.resolveProperty("hello.world", "bl.messages", Locale.getDefault())
+                + TestConstants.PROVIDED_RESOLVER_SUFFIX);
+        Assert.assertEquals(system.getText(), MessageBundleUtils.resolveProperty("system.linux.box", "bl.messages", Locale.getDefault(), "Linux", "16")
+                + TestConstants.PROVIDED_RESOLVER_SUFFIX);
+        Assert.assertEquals(other.getText(), MessageBundleUtils.resolveProperty("other.message", TestConstants.OTHER_RESOURCE_BUNDLE_NAME, Locale.getDefault())
+                + TestConstants.PROVIDED_RESOLVER_SUFFIX);
+        Assert.assertEquals(otherAbc.getText(),
                 MessageBundleUtils.resolveProperty("other.parameter", TestConstants.OTHER_RESOURCE_BUNDLE_NAME, Locale.getDefault(), "B")
                         + TestConstants.PROVIDED_RESOLVER_SUFFIX);
 
-        client.open(TestConstants.TESTING_URL + "/cdipropertiestest/cditestpt.xhtml");
-        Assert.assertEquals(client.getText("xpath=//span[contains(@id, 'hello')]"),
-                MessageBundleUtils.resolveProperty("hello.world", "bl.messages", new Locale("pt")) + TestConstants.PROVIDED_RESOLVER_SUFFIX);
-        Assert.assertEquals(client.getText("xpath=//span[contains(@id, 'system')]"),
-                MessageBundleUtils.resolveProperty("system.linux.box", "bl.messages", new Locale("pt"), "Linux", "16") + TestConstants.PROVIDED_RESOLVER_SUFFIX);
-        Assert.assertEquals(client.getText("xpath=//span[contains(@id, 'other')]"),
-                MessageBundleUtils.resolveProperty("other.message", TestConstants.OTHER_RESOURCE_BUNDLE_NAME, new Locale("pt"))
-                        + TestConstants.PROVIDED_RESOLVER_SUFFIX);
-        Assert.assertEquals(client.getText("xpath=//span[contains(@id, 'otherabc')]"),
+        browser.get(contextPath + "cditestpt.xhtml");
+        Assert.assertEquals(hello.getText(), MessageBundleUtils.resolveProperty("hello.world", "bl.messages", new Locale("pt"))
+                + TestConstants.PROVIDED_RESOLVER_SUFFIX);
+        Assert.assertEquals(system.getText(), MessageBundleUtils.resolveProperty("system.linux.box", "bl.messages", new Locale("pt"), "Linux", "16")
+                + TestConstants.PROVIDED_RESOLVER_SUFFIX);
+        Assert.assertEquals(other.getText(), MessageBundleUtils.resolveProperty("other.message", TestConstants.OTHER_RESOURCE_BUNDLE_NAME, new Locale("pt"))
+                + TestConstants.PROVIDED_RESOLVER_SUFFIX);
+        Assert.assertEquals(otherAbc.getText(),
                 MessageBundleUtils.resolveProperty("other.parameter", TestConstants.OTHER_RESOURCE_BUNDLE_NAME, new Locale("pt"), "B")
                         + TestConstants.PROVIDED_RESOLVER_SUFFIX);
     }
