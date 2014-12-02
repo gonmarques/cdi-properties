@@ -1,5 +1,7 @@
 #CDI Properties
 
+[![Build Status](https://travis-ci.org/gonmarques/cdi-properties.svg?branch=master)](https://travis-ci.org/gonmarques/cdi-properties)
+
 **Note**: CDI Properties includes a set of Arquillian based Integration Tests that cover the most common use case scenarios (from the simplest scenario to others that explore some degree of complexity). Detailed information about the included Integration Tests is available in the last section of this README file.
 
 **Maven Central Repository coordinates:**
@@ -181,7 +183,7 @@ The previous restrictions **do not apply** to web applications (WAR files). If t
 
 ##Integration Tests
 
-CDI Properties includes Arquillian based Integration Tests (resorting to Arquillian Drone in order to automate front-end application testing) that cover the following use case scenarios:
+CDI Properties includes Arquillian based Integration Tests (resorting to Arquillian Drone and Graphene in order to automate front-end application testing) that cover the following use case scenarios:
 
  - **JSF web based application (Extension's default property resolver method)**
 
