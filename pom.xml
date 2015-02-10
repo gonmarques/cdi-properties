@@ -44,6 +44,8 @@
 		<maven-compiler.version>3.1</maven-compiler.version>
 		<maven-resources.version>2.4</maven-resources.version>
 		<maven-failsafe-plugin.version>2.11</maven-failsafe-plugin.version>
+		<maven-source-plugin.version>2.2.1</maven-source-plugin.version>
+		<maven-javadoc-plugin.version>2.9.1</maven-javadoc-plugin.version>
 		<graphene-webdriver.version>2.0.3.Final</graphene-webdriver.version>
 		<h2.version>1.3.173</h2.version>
 	</properties>
@@ -59,6 +61,44 @@
 			<properties>
 				<skipTests>true</skipTests>
 			</properties>
+		</profile>
+		<profile>
+			<id>Javadoc</id>
+			<activation>
+				<property>
+					<name>javadoc</name>
+				</property>
+			</activation>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-source-plugin</artifactId>
+						<version>${maven-source-plugin.version}</version>
+						<executions>
+							<execution>
+								<id>attach-sources</id>
+								<goals>
+									<goal>jar</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-javadoc-plugin</artifactId>
+						<version>${maven-javadoc-plugin.version}</version>
+						<executions>
+							<execution>
+								<id>attach-javadocs</id>
+								<goals>
+									<goal>jar</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
 		</profile>
 	</profiles>
 

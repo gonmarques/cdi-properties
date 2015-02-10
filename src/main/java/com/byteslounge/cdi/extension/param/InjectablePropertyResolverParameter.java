@@ -10,7 +10,7 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package com.byteslounge.cdi.extension;
+package com.byteslounge.cdi.extension.param;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Member;
@@ -18,6 +18,7 @@ import java.lang.reflect.Type;
 import java.util.HashSet;
 import java.util.Set;
 
+import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.inject.spi.Annotated;
 import javax.enterprise.inject.spi.AnnotatedParameter;
 import javax.enterprise.inject.spi.Bean;
@@ -25,19 +26,19 @@ import javax.enterprise.inject.spi.BeanManager;
 import javax.enterprise.inject.spi.InjectionPoint;
 
 /**
- * Represents a property resolver method parameter to be injected by the CDI
- * container.
+ * Represents a resolver that will be used to evaluate the value 
+ * of a property resolver method parameter that shall be injected by the CDI container
  * 
  * @author Gonçalo Marques
  * @since 1.0.0
  */
-public class PropertyResolverParameter implements InjectionPoint {
+public class InjectablePropertyResolverParameter implements InjectionPoint, ResolverParameter {
 
     private final AnnotatedParameter<?> parameter;
     private final BeanManager beanManager;
     private final Bean<?> propertyResolverBean;
 
-    public PropertyResolverParameter(AnnotatedParameter<?> parameter, BeanManager beanManager, Bean<?> propertyResolverBean) {
+    public InjectablePropertyResolverParameter(AnnotatedParameter<?> parameter, BeanManager beanManager, Bean<?> propertyResolverBean) {
         this.parameter = parameter;
         this.beanManager = beanManager;
         this.propertyResolverBean = propertyResolverBean;
@@ -103,6 +104,14 @@ public class PropertyResolverParameter implements InjectionPoint {
     @Override
     public boolean isTransient() {
         return false;
+    }
+
+    /**
+     * see {@link ResolverParameter#resolve(String, String, CreationalContext)}
+     */
+    @Override
+    public <T> Object resolve(String key, String bundleName, CreationalContext<T> ctx) {
+        return beanManager.getInjectableReference(this, ctx);
     }
 
 }

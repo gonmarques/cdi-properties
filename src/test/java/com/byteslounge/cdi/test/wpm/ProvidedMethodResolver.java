@@ -21,6 +21,7 @@ import javax.enterprise.context.ApplicationScoped;
 import org.junit.Assert;
 
 import com.byteslounge.cdi.annotation.PropertyBundle;
+import com.byteslounge.cdi.annotation.PropertyKey;
 import com.byteslounge.cdi.annotation.PropertyLocale;
 import com.byteslounge.cdi.annotation.PropertyResolver;
 import com.byteslounge.cdi.test.common.ApplicationScopedBean;
@@ -41,9 +42,12 @@ public class ProvidedMethodResolver implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
+    // Lets provide a set of completely mixed up parameters in what matters to "logical" definition order
     @PropertyResolver
-    public String resolveProperty(@PropertyLocale Locale locale, @PropertyBundle String bundleName, String key, DependentScopedBean dependentScopedBean,
-            RequestScopedBean requestScopedBean, SessionScopedBean sessionScopedBean, ApplicationScopedBean applicationScopedBean, Service service) {
+    public String resolveProperty(DependentScopedBean dependentScopedBean,
+            RequestScopedBean requestScopedBean, SessionScopedBean sessionScopedBean,
+            @PropertyBundle String bundleName, @PropertyLocale Locale locale,
+            ApplicationScopedBean applicationScopedBean, @PropertyKey String key, Service service) {
 
         service.remove(1L);
         TestEntity testEntity = new TestEntity();

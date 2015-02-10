@@ -23,6 +23,7 @@ import javax.naming.NamingException;
 import org.junit.Assert;
 
 import com.byteslounge.cdi.annotation.PropertyBundle;
+import com.byteslounge.cdi.annotation.PropertyKey;
 import com.byteslounge.cdi.annotation.PropertyLocale;
 import com.byteslounge.cdi.annotation.PropertyResolver;
 import com.byteslounge.cdi.test.common.ApplicationScopedBean;
@@ -43,9 +44,10 @@ public class EjbProvidedMethodResolver implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
+    // Lets provide a set of completely mixed up parameters in what matters to "logical" definition order
     @PropertyResolver
-    public String resolveProperty(@PropertyLocale Locale locale, @PropertyBundle String bundleName, String key, DependentScopedBean dependentScopedBean,
-            ApplicationScopedBean applicationScopedBean) {
+    public String resolveProperty(@PropertyBundle String bundleName, DependentScopedBean dependentScopedBean,
+            @PropertyLocale Locale locale, ApplicationScopedBean applicationScopedBean, @PropertyKey String key) {
 
         Assert.assertEquals(dependentScopedBean.getText(), TestConstants.BEAN_TEST_RETURN_VALUE);
         Assert.assertEquals(applicationScopedBean.getText(), TestConstants.BEAN_TEST_RETURN_VALUE);

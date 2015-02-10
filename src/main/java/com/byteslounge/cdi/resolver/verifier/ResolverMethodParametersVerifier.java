@@ -26,6 +26,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.byteslounge.cdi.annotation.Property;
+import com.byteslounge.cdi.annotation.PropertyBundle;
+import com.byteslounge.cdi.annotation.PropertyKey;
+import com.byteslounge.cdi.annotation.PropertyLocale;
 import com.byteslounge.cdi.exception.ExtensionInitializationException;
 
 /**
@@ -38,14 +41,10 @@ import com.byteslounge.cdi.exception.ExtensionInitializationException;
 public class ResolverMethodParametersVerifier implements ResolverMethodVerifier {
 
     private final AnnotatedMethod<?> propertyResolverMethod;
-    private final int localeParameterIndex;
-    private final int bundleNameParameterIndex;
     private static final Logger logger = LoggerFactory.getLogger(ResolverMethodParametersVerifier.class);
 
-    public ResolverMethodParametersVerifier(AnnotatedMethod<?> propertyResolverMethod, int localeParameterIndex, int bundleNameParameterIndex) {
+    public ResolverMethodParametersVerifier(AnnotatedMethod<?> propertyResolverMethod) {
         this.propertyResolverMethod = propertyResolverMethod;
-        this.localeParameterIndex = localeParameterIndex;
-        this.bundleNameParameterIndex = bundleNameParameterIndex;
     }
 
     /**
@@ -53,23 +52,80 @@ public class ResolverMethodParametersVerifier implements ResolverMethodVerifier 
      */
     @Override
     public void verify() {
-        int startIndex = 1;
-        if (localeParameterIndex > -1) {
-            startIndex++;
-        }
-        if (bundleNameParameterIndex > -1) {
-            startIndex++;
-        }
-        int currentIndex = 0;
+        checkPropertyKeyExists();
+        checkRepeatedParameterType(PropertyKey.class);
+        checkRepeatedParameterType(PropertyLocale.class);
+        checkRepeatedParameterType(PropertyBundle.class);
+        checkMultipleAnnotationParameter();
         for (final AnnotatedParameter<?> parameter : propertyResolverMethod.getParameters()) {
-            if (currentIndex++ < startIndex) {
-                continue;
-            }
             if (checkDependentScope((Class<?>) parameter.getBaseType())) {
                 checkPropertyField((Class<?>) parameter.getBaseType(), (Class<?>) parameter.getBaseType());
             }
         }
+    }
 
+    /**
+     * Checks if there is at least one property resolver method parameter annotated with {@link PropertyKey}
+     */
+    private void checkPropertyKeyExists() {
+        boolean foundKeyProperty = false;
+        for (final AnnotatedParameter<?> parameter : propertyResolverMethod.getParameters()) {
+            if (parameter.isAnnotationPresent(PropertyKey.class)) {
+                foundKeyProperty = true;
+                break;
+            }
+        }
+        if (!foundKeyProperty) {
+            throw new ExtensionInitializationException(
+                    "At least one parameter of the custom property resolver must represent de property key, annotated with "
+                            + PropertyKey.class.getName());
+        }
+    }
+
+    /**
+     * Checks if the given parameter type exists in more than a single property resolver
+     * method parameter
+     * @param annotation
+     *            The parameter type being checked
+     */
+    private void checkRepeatedParameterType(Class<? extends Annotation> annotation) {
+        int count = 0;
+        for (final AnnotatedParameter<?> parameter : propertyResolverMethod.getParameters()) {
+            if (parameter.isAnnotationPresent(annotation)) {
+                count++;
+            }
+        }
+        if (count > 1) {
+            throw new ExtensionInitializationException("There must be only a single param annotated with "
+                    + annotation.getSimpleName() + " in the property resolver method");
+        }
+    }
+
+    /**
+     * Checks if any property resolver method parameter is annotated with 
+     * more than one of the following: {@link PropertyKey}, {@link PropertyBundle}, 
+     * {@link PropertyLocale}
+     */
+    private void checkMultipleAnnotationParameter() {
+        int count;
+        for (final AnnotatedParameter<?> parameter : propertyResolverMethod.getParameters()) {
+            count = 0;
+            if (parameter.isAnnotationPresent(PropertyKey.class)) {
+                count++;
+            }
+            if (parameter.isAnnotationPresent(PropertyBundle.class)) {
+                count++;
+            }
+            if (parameter.isAnnotationPresent(PropertyLocale.class)) {
+                count++;
+            }
+            if (count > 1) {
+                throw new ExtensionInitializationException(
+                        "A property resolver method parameter must not be annotated with more than one of the following: "
+                                + PropertyKey.class.getSimpleName() + ", " + PropertyBundle.class.getSimpleName()
+                                + " or " + PropertyLocale.class.getSimpleName());
+            }
+        }
     }
 
     /**

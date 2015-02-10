@@ -22,6 +22,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.byteslounge.cdi.annotation.PropertyBundle;
+import com.byteslounge.cdi.annotation.PropertyKey;
 import com.byteslounge.cdi.annotation.PropertyLocale;
 import com.byteslounge.cdi.annotation.PropertyResolver;
 
@@ -50,7 +51,8 @@ public class DefaultPropertyResolverMethod implements Serializable {
      * @return The resolved property
      */
     @PropertyResolver
-    public String resolveProperty(@PropertyLocale Locale locale, @PropertyBundle String bundleName, String key) {
+    public String resolveProperty(@PropertyLocale Locale locale, @PropertyBundle String bundleName,
+            @PropertyKey String key) {
         if (logger.isDebugEnabled()) {
             logger.debug("Resolving property. Locale " + locale.toString() + ", bundle: " + bundleName + ", key: " + key);
         }
