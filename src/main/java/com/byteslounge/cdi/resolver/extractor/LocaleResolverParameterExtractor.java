@@ -12,8 +12,11 @@
  */
 package com.byteslounge.cdi.resolver.extractor;
 
+import java.util.Locale;
+
 import com.byteslounge.cdi.annotation.PropertyLocale;
 import com.byteslounge.cdi.extension.param.LocalePropertyResolverParameter;
+import com.byteslounge.cdi.resolver.bean.ResolverBean;
 
 /**
  * Represents the extractor for the Locale property resolver method parameter
@@ -24,8 +27,8 @@ import com.byteslounge.cdi.extension.param.LocalePropertyResolverParameter;
 public class LocaleResolverParameterExtractor extends
         ProvidedResolverParameterExtractor<LocalePropertyResolverParameter> {
 
-    public LocaleResolverParameterExtractor() {
-        super(PropertyLocale.class, new LocalePropertyResolverParameter());
+    public LocaleResolverParameterExtractor(ResolverBean<Locale> localeResolverBean) {
+        super(PropertyLocale.class, new LocalePropertyResolverParameter(localeResolverBean));
     }
 
 }

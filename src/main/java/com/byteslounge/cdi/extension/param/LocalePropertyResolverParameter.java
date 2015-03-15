@@ -12,9 +12,12 @@
  */
 package com.byteslounge.cdi.extension.param;
 
+import java.util.Locale;
+
 import javax.enterprise.context.spi.CreationalContext;
 
-import com.byteslounge.cdi.resolver.locale.LocaleResolverFactory;
+import com.byteslounge.cdi.resolver.bean.ResolverBean;
+import com.byteslounge.cdi.resolver.context.ResolverContext;
 
 /**
  * Represents a resolver that will be used to evaluate a 
@@ -23,14 +26,20 @@ import com.byteslounge.cdi.resolver.locale.LocaleResolverFactory;
  * @author Gonçalo Marques
  * @since 1.1.0
  */
-public class LocalePropertyResolverParameter implements ResolverParameter {
+public class LocalePropertyResolverParameter implements ResolverParameter<Locale> {
+
+    private final ResolverBean<Locale> localeResolverBean;
+
+    public LocalePropertyResolverParameter(ResolverBean<Locale> localResolverBean) {
+        this.localeResolverBean = localResolverBean;
+    }
 
     /**
      * see {@link ResolverParameter#resolve(String, String, CreationalContext)}
      */
     @Override
-    public <T> Object resolve(String key, String bundleName, CreationalContext<T> ctx) {
-        return LocaleResolverFactory.getLocaleResolver().getLocale();
+    public <T> Locale resolve(ResolverContext resolverContext, CreationalContext<T> ctx) {
+        return localeResolverBean.invoke(resolverContext, ctx);
     }
 
 }

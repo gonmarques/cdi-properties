@@ -29,7 +29,8 @@ import com.byteslounge.cdi.converter.PropertyConverter;
 import com.byteslounge.cdi.converter.PropertyConverterFactory;
 import com.byteslounge.cdi.exception.PropertyResolverException;
 import com.byteslounge.cdi.format.PropertyFormat;
-import com.byteslounge.cdi.resolver.PropertyResolver;
+import com.byteslounge.cdi.resolver.bean.PropertyResolverBean;
+import com.byteslounge.cdi.resolver.context.ResolverContext;
 
 /**
  * Checks if the CDI injection target contains any fields annotated with
@@ -42,16 +43,17 @@ public class PropertyResolverInjectionTarget<T> implements InjectionTarget<T> {
 
     private final InjectionTarget<T> injectionTarget;
     private final AnnotatedType<T> annotatedType;
-    private final PropertyResolver propertyResolver;
+    private final PropertyResolverBean propertyResolverBean;
     private final PropertyFormat propertyFormat;
 
     private static final Logger logger = LoggerFactory.getLogger(PropertyResolverInjectionTarget.class);
 
-    public PropertyResolverInjectionTarget(InjectionTarget<T> injectionTarget, AnnotatedType<T> annotatedType, PropertyResolver propertyResolver,
+    public PropertyResolverInjectionTarget(InjectionTarget<T> injectionTarget, AnnotatedType<T> annotatedType,
+            PropertyResolverBean propertyResolverBean,
             PropertyFormat propertyFormat) {
         this.injectionTarget = injectionTarget;
         this.annotatedType = annotatedType;
-        this.propertyResolver = propertyResolver;
+        this.propertyResolverBean = propertyResolverBean;
         this.propertyFormat = propertyFormat;
     }
 
@@ -99,7 +101,7 @@ public class PropertyResolverInjectionTarget<T> implements InjectionTarget<T> {
                 }
                 field.setAccessible(true);
 
-                String value = propertyResolver.resolve(key, bundleName, ctx);
+                String value = propertyResolverBean.invoke(ResolverContext.create(key, bundleName), ctx);
 
                 if (logger.isDebugEnabled()) {
                     logger.debug("Resolved property with key " + key + " to " + value);

@@ -21,7 +21,7 @@ package com.byteslounge.cdi.resolver.locale;
  */
 public class LocaleResolverFactory {
 
-    private static LocaleResolver localeResolver;
+    private static volatile LocaleResolver localeResolver;
 
     private LocaleResolverFactory() {
     }

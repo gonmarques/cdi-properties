@@ -25,7 +25,7 @@ import com.byteslounge.cdi.extension.param.ResolverParameter;
  * @author Gonçalo Marques
  * @since 1.1.0
  */
-public abstract class ProvidedResolverParameterExtractor<T extends ResolverParameter> implements ResolverParameterExtractor<T> {
+public abstract class ProvidedResolverParameterExtractor<T extends ResolverParameter<?>> implements ResolverParameterExtractor<T> {
 
     private final Class<? extends Annotation> parameterType;
     private final T resolverParameter;

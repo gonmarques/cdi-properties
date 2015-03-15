@@ -22,7 +22,7 @@ import com.byteslounge.cdi.extension.param.ResolverParameter;
  * @author Gonçalo Marques
  * @since 1.1.0
  */
-public interface ResolverParameterExtractor<T extends ResolverParameter> {
+public interface ResolverParameterExtractor<T extends ResolverParameter<?>> {
 
     /**
      * Returns the resolver that will be used to extract a given property resolver method parameter

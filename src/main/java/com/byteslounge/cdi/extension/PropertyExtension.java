@@ -14,7 +14,6 @@ package com.byteslounge.cdi.extension;
 
 import javax.enterprise.event.Observes;
 import javax.enterprise.inject.spi.AfterDeploymentValidation;
-import javax.enterprise.inject.spi.AnnotatedMethod;
 import javax.enterprise.inject.spi.AnnotatedType;
 import javax.enterprise.inject.spi.BeanManager;
 import javax.enterprise.inject.spi.Extension;
@@ -22,19 +21,12 @@ import javax.enterprise.inject.spi.InjectionTarget;
 import javax.enterprise.inject.spi.ProcessAnnotatedType;
 import javax.enterprise.inject.spi.ProcessInjectionTarget;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.byteslounge.cdi.annotation.Property;
-import com.byteslounge.cdi.annotation.PropertyResolver;
 import com.byteslounge.cdi.configuration.ExtensionConfiguration;
-import com.byteslounge.cdi.exception.ExtensionInitializationException;
 import com.byteslounge.cdi.format.PropertyFormat;
 import com.byteslounge.cdi.format.PropertyFormatFactory;
-import com.byteslounge.cdi.resolver.DefaultPropertyResolverMethod;
-import com.byteslounge.cdi.resolver.PropertyResolverFactory;
+import com.byteslounge.cdi.resolver.bean.LocaleResolverBean;
 import com.byteslounge.cdi.resolver.bean.PropertyResolverBean;
-import com.byteslounge.cdi.utils.MessageUtils;
+import com.byteslounge.cdi.resolver.bean.ResolverGateway;
 
 /**
  * The CDI Properties extension.
@@ -44,51 +36,22 @@ import com.byteslounge.cdi.utils.MessageUtils;
  */
 public class PropertyExtension implements Extension {
 
-    private static final Logger logger = LoggerFactory.getLogger(PropertyExtension.class);
-    private PropertyResolverBean propertyResolverBean;
-    private AnnotatedMethod<?> resolverMethod = null;
-    private AnnotatedMethod<?> providedResolverMethod = null;
+    private final ResolverGateway resolverGateway = new ResolverGateway(new PropertyResolverBean(),
+            new LocaleResolverBean());
 
     /**
-     * Scans every CDI managed bean for a property resolver method. If no
-     * application provided resolver method is found, it will use the
-     * extension's default resolver method.
-     * 
-     * If the extension detects more than a single application provided resolver
-     * method it will throw an initialization exception.
+     * Passes every found CDI managed bean to the resolver gateway 
+     * in order to check if it represents an extension's resolver method.
      * 
      * @param pat
      *            The CDI managed type being scanned
      */
     void processAnnotatedType(@Observes ProcessAnnotatedType<?> pat) {
-
-        AnnotatedType<?> at = pat.getAnnotatedType();
-
-        for (AnnotatedMethod<?> method : at.getMethods()) {
-            if (method.isAnnotationPresent(PropertyResolver.class)) {
-                if (method.getJavaMember().getDeclaringClass().equals(DefaultPropertyResolverMethod.class)) {
-                    resolverMethod = method;
-                    if (logger.isDebugEnabled()) {
-                        logger.debug("Found default resolver method: " + MessageUtils.getMethodDefinition(method));
-                    }
-                } else {
-                    if (providedResolverMethod != null) {
-                        String errorMessage = "Found multiple provided property resolver methods: " + MessageUtils.getMethodDefinition(providedResolverMethod)
-                                + ", " + MessageUtils.getMethodDefinition(method);
-                        logger.error(errorMessage);
-                        throw new ExtensionInitializationException(errorMessage);
-                    }
-                    providedResolverMethod = method;
-                    if (logger.isDebugEnabled()) {
-                        logger.debug("Found provided resolver method: " + MessageUtils.getMethodDefinition(providedResolverMethod));
-                    }
-                }
-            }
-        }
+        resolverGateway.process(pat.getAnnotatedType());
     }
 
     /**
-     * Initializes the property resolver bean
+     * Initializes the extension's resolver beans
      * 
      * @param adv
      *            The after deployment validation metadata
@@ -96,14 +59,16 @@ public class PropertyExtension implements Extension {
      *            The CDI bean manager
      */
     void afterDeploymentValidation(@Observes AfterDeploymentValidation adv, BeanManager beanManager) {
-        propertyResolverBean.initializePropertyResolverBean();
+        PropertyResolverBean propertyResolverBean = resolverGateway.getResolver(PropertyResolverBean.class);
+        LocaleResolverBean localeResolverBean = resolverGateway.getResolver(LocaleResolverBean.class);
+        propertyResolverBean.setLocaleResolverBean(localeResolverBean);
+        resolverGateway.intializeResolvers(beanManager);
         ExtensionConfiguration.INSTANCE.init();
-        logger.info("Configured property resolver method: " + MessageUtils.getMethodDefinition(resolverMethod));
     }
 
     /**
-     * Processes every available CDI injection target and prepares property
-     * injection if any target field is annotated with {@link Property}
+     * Processes every available CDI injection target and wires it up with the necessary
+     * property resolution processing
      * 
      * @param pit
      *            The injection target being configured
@@ -111,32 +76,11 @@ public class PropertyExtension implements Extension {
      *            The CDI bean manager
      */
     <T> void processInjectionTarget(@Observes ProcessInjectionTarget<T> pit, BeanManager beanManager) {
-        if (propertyResolverBean == null) {
-            initializePropertyResolverBean(beanManager);
-        }
         InjectionTarget<T> it = pit.getInjectionTarget();
         AnnotatedType<T> at = pit.getAnnotatedType();
-        com.byteslounge.cdi.resolver.PropertyResolver propertyResolver = PropertyResolverFactory.getInstance(propertyResolverBean);
         PropertyFormat propertyFormat = PropertyFormatFactory.getInstance();
-        pit.setInjectionTarget(new PropertyResolverInjectionTarget<T>(it, at, propertyResolver, propertyFormat));
-    }
-
-    /**
-     * Initializes the property resolver bean
-     * 
-     * @param beanManager
-     *            The CDI bean manager
-     */
-    private void initializePropertyResolverBean(BeanManager beanManager) {
-        if (providedResolverMethod != null) {
-            resolverMethod = providedResolverMethod;
-        }
-        if (resolverMethod == null) {
-            String errorMessage = "Could not find any property resolver method.";
-            logger.error(errorMessage);
-            throw new ExtensionInitializationException(errorMessage);
-        }
-        propertyResolverBean = new PropertyResolverBean(resolverMethod, beanManager);
+        pit.setInjectionTarget(new PropertyResolverInjectionTarget<T>(it, at, resolverGateway
+                .getResolver(PropertyResolverBean.class), propertyFormat));
     }
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 byteslounge.com (Gonçalo Marques).
+ * Copyright 2015 byteslounge.com (Gonçalo Marques).
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -26,24 +26,22 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.byteslounge.cdi.annotation.Property;
-import com.byteslounge.cdi.annotation.PropertyBundle;
-import com.byteslounge.cdi.annotation.PropertyKey;
-import com.byteslounge.cdi.annotation.PropertyLocale;
 import com.byteslounge.cdi.exception.ExtensionInitializationException;
 
 /**
- * Checks if the custom injected property method resolver parameters are
- * properly configured
+ * Checks if a custom resolver method parameter scope is Dependent
+ * and also contains fields annotated with {@link com.byteslounge.cdi.annotation.Property} 
+ * (this is not allowed)
  * 
  * @author Gonçalo Marques
- * @since 1.0.0
+ * @since 1.1.0
  */
-public class ResolverMethodParametersVerifier implements ResolverMethodVerifier {
+public class DependentResolverMethodParametersVerifier implements ResolverMethodVerifier {
 
     private final AnnotatedMethod<?> propertyResolverMethod;
-    private static final Logger logger = LoggerFactory.getLogger(ResolverMethodParametersVerifier.class);
+    private static final Logger logger = LoggerFactory.getLogger(DependentResolverMethodParametersVerifier.class);
 
-    public ResolverMethodParametersVerifier(AnnotatedMethod<?> propertyResolverMethod) {
+    public DependentResolverMethodParametersVerifier(AnnotatedMethod<?> propertyResolverMethod) {
         this.propertyResolverMethod = propertyResolverMethod;
     }
 
@@ -52,11 +50,6 @@ public class ResolverMethodParametersVerifier implements ResolverMethodVerifier 
      */
     @Override
     public void verify() {
-        checkPropertyKeyExists();
-        checkRepeatedParameterType(PropertyKey.class);
-        checkRepeatedParameterType(PropertyLocale.class);
-        checkRepeatedParameterType(PropertyBundle.class);
-        checkMultipleAnnotationParameter();
         for (final AnnotatedParameter<?> parameter : propertyResolverMethod.getParameters()) {
             if (checkDependentScope((Class<?>) parameter.getBaseType())) {
                 checkPropertyField((Class<?>) parameter.getBaseType(), (Class<?>) parameter.getBaseType());
@@ -65,71 +58,7 @@ public class ResolverMethodParametersVerifier implements ResolverMethodVerifier 
     }
 
     /**
-     * Checks if there is at least one property resolver method parameter annotated with {@link PropertyKey}
-     */
-    private void checkPropertyKeyExists() {
-        boolean foundKeyProperty = false;
-        for (final AnnotatedParameter<?> parameter : propertyResolverMethod.getParameters()) {
-            if (parameter.isAnnotationPresent(PropertyKey.class)) {
-                foundKeyProperty = true;
-                break;
-            }
-        }
-        if (!foundKeyProperty) {
-            throw new ExtensionInitializationException(
-                    "At least one parameter of the custom property resolver must represent de property key, annotated with "
-                            + PropertyKey.class.getName());
-        }
-    }
-
-    /**
-     * Checks if the given parameter type exists in more than a single property resolver
-     * method parameter
-     * @param annotation
-     *            The parameter type being checked
-     */
-    private void checkRepeatedParameterType(Class<? extends Annotation> annotation) {
-        int count = 0;
-        for (final AnnotatedParameter<?> parameter : propertyResolverMethod.getParameters()) {
-            if (parameter.isAnnotationPresent(annotation)) {
-                count++;
-            }
-        }
-        if (count > 1) {
-            throw new ExtensionInitializationException("There must be only a single param annotated with "
-                    + annotation.getSimpleName() + " in the property resolver method");
-        }
-    }
-
-    /**
-     * Checks if any property resolver method parameter is annotated with 
-     * more than one of the following: {@link PropertyKey}, {@link PropertyBundle}, 
-     * {@link PropertyLocale}
-     */
-    private void checkMultipleAnnotationParameter() {
-        int count;
-        for (final AnnotatedParameter<?> parameter : propertyResolverMethod.getParameters()) {
-            count = 0;
-            if (parameter.isAnnotationPresent(PropertyKey.class)) {
-                count++;
-            }
-            if (parameter.isAnnotationPresent(PropertyBundle.class)) {
-                count++;
-            }
-            if (parameter.isAnnotationPresent(PropertyLocale.class)) {
-                count++;
-            }
-            if (count > 1) {
-                throw new ExtensionInitializationException(
-                        "A property resolver method parameter must not be annotated with more than one of the following: "
-                                + PropertyKey.class.getSimpleName() + ", " + PropertyBundle.class.getSimpleName()
-                                + " or " + PropertyLocale.class.getSimpleName());
-            }
-        }
-    }
-
-    /**
-     * Checks if a custom injected parameter scope is {@link Dependent}
+     * Checks if a custom resolver method injected parameter scope is {@link Dependent}
      * 
      * @param type
      *            The parameter type being checked

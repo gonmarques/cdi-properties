@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 byteslounge.com (Gonçalo Marques).
+ * Copyright 2015 byteslounge.com (Gonçalo Marques).
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -25,20 +25,22 @@ import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.BeanManager;
 import javax.enterprise.inject.spi.InjectionPoint;
 
+import com.byteslounge.cdi.resolver.context.ResolverContext;
+
 /**
  * Represents a resolver that will be used to evaluate the value 
- * of a property resolver method parameter that shall be injected by the CDI container
+ * of a resolver method parameter that shall be injected by the CDI container
  * 
  * @author Gonçalo Marques
- * @since 1.0.0
+ * @since 1.1.0
  */
-public class InjectablePropertyResolverParameter implements InjectionPoint, ResolverParameter {
+public class InjectableResolverParameter implements InjectionPoint, ResolverParameter<Object> {
 
     private final AnnotatedParameter<?> parameter;
     private final BeanManager beanManager;
     private final Bean<?> propertyResolverBean;
 
-    public InjectablePropertyResolverParameter(AnnotatedParameter<?> parameter, BeanManager beanManager, Bean<?> propertyResolverBean) {
+    public InjectableResolverParameter(AnnotatedParameter<?> parameter, BeanManager beanManager, Bean<?> propertyResolverBean) {
         this.parameter = parameter;
         this.beanManager = beanManager;
         this.propertyResolverBean = propertyResolverBean;
@@ -110,7 +112,7 @@ public class InjectablePropertyResolverParameter implements InjectionPoint, Reso
      * see {@link ResolverParameter#resolve(String, String, CreationalContext)}
      */
     @Override
-    public <T> Object resolve(String key, String bundleName, CreationalContext<T> ctx) {
+    public <T> Object resolve(ResolverContext resolverContext, CreationalContext<T> ctx) {
         return beanManager.getInjectableReference(this, ctx);
     }
 

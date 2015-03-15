@@ -14,25 +14,26 @@ package com.byteslounge.cdi.extension.param;
 
 import javax.enterprise.context.spi.CreationalContext;
 
+import com.byteslounge.cdi.resolver.context.ResolverContext;
+
 /**
- * Represents a resolver that will be used to evaluate a property resolver method parameter
+ * Represents a resolver that will be used to evaluate a resolver method parameter
  * 
  * @author Gonçalo Marques
  * @since 1.1.0
  */
-public interface ResolverParameter {
+public interface ResolverParameter<R> {
 
     /**
-     * Resolves the value for a given property resolver method parameter
-     * @param key
-     *            The parameter key
-     * @param bundleName
-     *            The parameter resource bundle name
+     * Resolves the value for a given resolver method parameter
+     * 
+     * @param resolverContext
+     *            The resolver context
      * @param ctx
      *            The CDI creational context
      * @return
      *            The value to be injected into the property resolver method parameter
      */
-    <T> Object resolve(String key, String bundleName, CreationalContext<T> ctx);
+    <T> R resolve(ResolverContext resolverContext, CreationalContext<T> ctx);
 
 }

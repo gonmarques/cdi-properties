@@ -30,11 +30,11 @@ public class JSFLocaleResolver implements LocaleResolver {
      */
     @Override
     public Locale getLocale() {
-        FacesContext context = FacesContext.getCurrentInstance();
-        if (context == null) {
-            throw new RuntimeException("Could not get current FacesContext");
+        try {
+            return FacesContext.getCurrentInstance().getViewRoot().getLocale();
+        } catch (Exception e) {
+            return Locale.getDefault();
         }
-        return context.getViewRoot().getLocale();
     }
 
 }

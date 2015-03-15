@@ -14,6 +14,8 @@ package com.byteslounge.cdi.extension.param;
 
 import javax.enterprise.context.spi.CreationalContext;
 
+import com.byteslounge.cdi.resolver.context.ResolverContext;
+
 /**
  * Represents a resolver that will be used to evaluate a 
  * parameter of the property resolver method of type Key
@@ -21,14 +23,14 @@ import javax.enterprise.context.spi.CreationalContext;
  * @author Gonçalo Marques
  * @since 1.1.0
  */
-public class KeyPropertyResolverParameter implements ResolverParameter {
+public class KeyPropertyResolverParameter implements ResolverParameter<String> {
 
     /**
      * see {@link ResolverParameter#resolve(String, String, CreationalContext)}
      */
     @Override
-    public <T> Object resolve(String key, String bundleName, CreationalContext<T> ctx) {
-        return key;
+    public <T> String resolve(ResolverContext resolverContext, CreationalContext<T> ctx) {
+        return resolverContext.getKey();
     }
 
 }
