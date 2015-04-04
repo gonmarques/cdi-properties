@@ -113,6 +113,13 @@ public abstract class AbstractResolverBean<T> implements ResolverBean<T> {
         Class<?> resolverMethodClass = resolverMethod.getJavaMember().getDeclaringClass();
         Set<Bean<?>> beans = beanManager.getBeans(resolverMethodClass);
         final Bean<?> resolverBean = beanManager.resolve(beans);
+        if (resolverBean == null) {
+            throw new ExtensionInitializationException(
+                    "Could not resolve bean for class: "
+                            + resolverMethodClass.getName()
+                            + ". The class is probably deployed in a module that is not accessible by the CDI Properties extension classloader."
+                            + " Try to deploy the resolver class in a library JAR instead.");
+        }
         CreationalContext<?> creationalContext = beanManager.createCreationalContext(resolverBean);
         resolverInstance = beanManager.getReference(resolverBean, resolverMethodClass,
                 creationalContext);

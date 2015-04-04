@@ -63,10 +63,10 @@
 			</properties>
 		</profile>
 		<profile>
-			<id>Javadoc</id>
+			<id>OSSRH</id>
 			<activation>
 				<property>
-					<name>javadoc</name>
+					<name>ossrh</name>
 				</property>
 			</activation>
 			<build>
@@ -97,6 +97,31 @@
 							</execution>
 						</executions>
 					</plugin>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-gpg-plugin</artifactId>
+						<version>1.5</version>
+						<executions>
+							<execution>
+								<id>sign-artifacts</id>
+								<phase>verify</phase>
+								<goals>
+									<goal>sign</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+					<plugin>
+						<groupId>org.sonatype.plugins</groupId>
+						<artifactId>nexus-staging-maven-plugin</artifactId>
+						<version>1.6.2</version>
+						<extensions>true</extensions>
+						<configuration>
+							<serverId>ossrh</serverId>
+							<nexusUrl>https://oss.sonatype.org/</nexusUrl>
+							<autoReleaseAfterClose>false</autoReleaseAfterClose>
+						</configuration>
+					</plugin>
 				</plugins>
 			</build>
 		</profile>
@@ -125,6 +150,7 @@
 				<artifactId>maven-failsafe-plugin</artifactId>
 				<version>${maven-failsafe-plugin.version}</version>
 				<configuration>
+					<useSystemClassLoader>false</useSystemClassLoader>
 					<systemPropertyVariables>
 						<project.version>${project.version}</project.version>
 					</systemPropertyVariables>

@@ -27,6 +27,7 @@ import org.slf4j.LoggerFactory;
 
 import com.byteslounge.cdi.annotation.Property;
 import com.byteslounge.cdi.exception.ExtensionInitializationException;
+import com.byteslounge.cdi.utils.MessageUtils;
 
 /**
  * Checks if a custom resolver method parameter scope is Dependent
@@ -38,11 +39,11 @@ import com.byteslounge.cdi.exception.ExtensionInitializationException;
  */
 public class DependentResolverMethodParametersVerifier implements ResolverMethodVerifier {
 
-    private final AnnotatedMethod<?> propertyResolverMethod;
+    private final AnnotatedMethod<?> resolverMethod;
     private static final Logger logger = LoggerFactory.getLogger(DependentResolverMethodParametersVerifier.class);
 
-    public DependentResolverMethodParametersVerifier(AnnotatedMethod<?> propertyResolverMethod) {
-        this.propertyResolverMethod = propertyResolverMethod;
+    public DependentResolverMethodParametersVerifier(AnnotatedMethod<?> resolverMethod) {
+        this.resolverMethod = resolverMethod;
     }
 
     /**
@@ -50,7 +51,7 @@ public class DependentResolverMethodParametersVerifier implements ResolverMethod
      */
     @Override
     public void verify() {
-        for (final AnnotatedParameter<?> parameter : propertyResolverMethod.getParameters()) {
+        for (final AnnotatedParameter<?> parameter : resolverMethod.getParameters()) {
             if (checkDependentScope((Class<?>) parameter.getBaseType())) {
                 checkPropertyField((Class<?>) parameter.getBaseType(), (Class<?>) parameter.getBaseType());
             }
@@ -104,7 +105,9 @@ public class DependentResolverMethodParametersVerifier implements ResolverMethod
             for (Annotation annotation : field.getAnnotations()) {
                 if (annotation.annotationType().equals(Property.class)) {
                     throw new ExtensionInitializationException(
-                            "Property resolver method is injecting a Dependent scoped bean which in turn also has an injected @"
+                            "Resolver method "
+                                    + MessageUtils.getMethodDefinition(resolverMethod)
+                                    + " is injecting a Dependent scoped bean which in turn also has an injected @"
                                     + Property.class.getSimpleName()
                                     + " (this would cause a stack overflow because Dependent scoped bean instances are injected directly and not proxied). Type: "
                                     + originalType.getSimpleName() + ", field: " + field.getName());

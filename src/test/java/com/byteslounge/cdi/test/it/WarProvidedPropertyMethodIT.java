@@ -17,15 +17,12 @@ import java.net.URL;
 import java.util.Locale;
 
 import org.jboss.arquillian.container.test.api.Deployment;
-import org.jboss.arquillian.container.test.api.OperateOnDeployment;
 import org.jboss.arquillian.container.test.api.RunAsClient;
 import org.jboss.arquillian.drone.api.annotation.Drone;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.arquillian.test.api.ArquillianResource;
 import org.jboss.shrinkwrap.api.Archive;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
-import org.jboss.shrinkwrap.api.spec.EnterpriseArchive;
-import org.jboss.shrinkwrap.api.spec.JavaArchive;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.junit.Assert;
 import org.junit.Test;
@@ -46,7 +43,7 @@ import com.byteslounge.cdi.test.utils.MessageBundleUtils;
  * @since 1.0.0
  */
 @RunWith(Arquillian.class)
-public class EjbProvidedMethodIT {
+public class WarProvidedPropertyMethodIT {
 
     @Drone
     private WebDriver browser;
@@ -63,60 +60,33 @@ public class EjbProvidedMethodIT {
     @FindBy(id = "otherabc")
     private WebElement otherAbc;
 
-    @Deployment(name = "EAR", order = 1)
-    public static Archive<?> createEnterpriseArchive() throws IOException {
+    @Deployment
+    public static Archive<?> createArchive() throws IOException {
 
-        JavaArchive ejbModule = ShrinkWrap.create(JavaArchive.class, "cdipropertiesejb.jar");
-        DeploymentClassAppenderFactory.create(ejbModule).append("com.byteslounge.cdi.test.edm.ServiceEjbDefaultMethod")
-                .append("com.byteslounge.cdi.test.edm.ServiceEjbDefaultMethodBean")
-                .append("com.byteslounge.cdi.test.model.TestEntity")
-                .append("com.byteslounge.cdi.test.epm.ServiceEjbProvidedMethod")
-                .append("com.byteslounge.cdi.test.epm.ServiceEjbProvidedMethodBean").appendBeansXml()
-                .appendPersistenceXml();
-        IntegrationTestDeploymentUtils.printArchive(ejbModule);
-
-        JavaArchive resourcesJar = ShrinkWrap.create(JavaArchive.class, "resources.jar");
-        DeploymentClassAppenderFactory.create(resourcesJar).appendLogging().appendProperties().appendOtherProperties()
-                .appendCDIPropertiesConfig();
-        IntegrationTestDeploymentUtils.printArchive(resourcesJar);
-
-        JavaArchive resolverJar = ShrinkWrap.create(JavaArchive.class, "resolver.jar");
-        DeploymentClassAppenderFactory.create(resolverJar)
-                .append("com.byteslounge.cdi.test.epm.EjbProvidedMethodResolver")
+        WebArchive webArchive = ShrinkWrap.create(WebArchive.class, "cdipropertiestest.war");
+        DeploymentClassAppenderFactory.create(webArchive).append("com.byteslounge.cdi.test.common.TestBean")
+                .append("com.byteslounge.cdi.test.common.InjectedBean")
                 .append("com.byteslounge.cdi.test.common.ApplicationScopedBean")
                 .append("com.byteslounge.cdi.test.common.DependentScopedBean")
-                .append("com.byteslounge.cdi.test.common.InjectedBean")
-                .append("com.byteslounge.cdi.test.epm.ServiceEjbProvidedMethod")
-                .append("com.byteslounge.cdi.test.model.TestEntity").appendBeansXml();
-        IntegrationTestDeploymentUtils.printArchive(resolverJar);
-
-        EnterpriseArchive ear = ShrinkWrap.create(EnterpriseArchive.class, "cdiproperties.ear").addAsModule(ejbModule)
-                .addAsLibrary(resourcesJar).addAsLibrary(resolverJar);
-        DeploymentClassAppenderFactory.create(ear).appendApplicationXml().appendCDIPropertiesLib();
-        IntegrationTestDeploymentUtils.printArchive(ear);
-        return ear;
-    }
-
-    @Deployment(name = "WAR", order = 2)
-    public static Archive<?> createWebArchive() throws IOException {
-
-        WebArchive webModule = ShrinkWrap.create(WebArchive.class, "cdipropertiestest.war");
-        DeploymentClassAppenderFactory.create(webModule).append("com.byteslounge.cdi.test.edm.ServiceEjbDefaultMethod")
-                .append("com.byteslounge.cdi.test.common.InjectedBean")
-                .append("com.byteslounge.cdi.test.edm.TestEjbDefaultBean")
-                .appendWebXml("src/test/resources/assets/common/ejbCommon/WEB-INF/web.xml")
-                .appendWebResource("src/test/resources/assets/common/ejbCommon/webapp/cditestejb.xhtml")
-                .appendFacesConfig()
-                .appendBeansXml();
-        IntegrationTestDeploymentUtils.printArchive(webModule);
-        return webModule;
+                .append("com.byteslounge.cdi.test.wpm.ProvidedPropertyMethodResolver")
+                .append("com.byteslounge.cdi.test.wpm.RequestScopedBean")
+                .append("com.byteslounge.cdi.test.wpm.SessionScopedBean")
+                .append("com.byteslounge.cdi.test.wpm.Service").append("com.byteslounge.cdi.test.wpm.ServiceBean")
+                .append("com.byteslounge.cdi.test.model.TestEntity")
+                .appendWebXml("src/test/resources/assets/warCommon/WEB-INF/web.xml")
+                .appendWebResource("src/test/resources/assets/warCommon/webapp/cditest.xhtml",
+                        "src/test/resources/assets/warCommon/webapp/cditestpt.xhtml").appendBeansXml()
+                .appendPersistenceXml()
+                .appendFacesConfig().appendCDIPropertiesLib().appendLogging().appendProperties()
+                .appendOtherProperties();
+        IntegrationTestDeploymentUtils.printArchive(webArchive);
+        return webArchive;
     }
 
     @Test
     @RunAsClient
-    @OperateOnDeployment("WAR")
     public void test(@ArquillianResource URL contextPath) {
-        browser.get(contextPath + "cditestejb.xhtml");
+        browser.get(contextPath + "cditest.xhtml");
         Assert.assertEquals(hello.getText(), MessageBundleUtils.resolveProperty("hello.world", "bl.messages", Locale.getDefault())
                 + TestConstants.PROVIDED_RESOLVER_SUFFIX);
         Assert.assertEquals(system.getText(), MessageBundleUtils.resolveProperty("system.linux.box", "bl.messages", Locale.getDefault(), "Linux", "16")
@@ -127,6 +97,16 @@ public class EjbProvidedMethodIT {
                 MessageBundleUtils.resolveProperty("other.parameter", TestConstants.OTHER_RESOURCE_BUNDLE_NAME, Locale.getDefault(), "B")
                         + TestConstants.PROVIDED_RESOLVER_SUFFIX);
 
+        browser.get(contextPath + "cditestpt.xhtml");
+        Assert.assertEquals(hello.getText(), MessageBundleUtils.resolveProperty("hello.world", "bl.messages", new Locale("pt"))
+                + TestConstants.PROVIDED_RESOLVER_SUFFIX);
+        Assert.assertEquals(system.getText(), MessageBundleUtils.resolveProperty("system.linux.box", "bl.messages", new Locale("pt"), "Linux", "16")
+                + TestConstants.PROVIDED_RESOLVER_SUFFIX);
+        Assert.assertEquals(other.getText(), MessageBundleUtils.resolveProperty("other.message", TestConstants.OTHER_RESOURCE_BUNDLE_NAME, new Locale("pt"))
+                + TestConstants.PROVIDED_RESOLVER_SUFFIX);
+        Assert.assertEquals(otherAbc.getText(),
+                MessageBundleUtils.resolveProperty("other.parameter", TestConstants.OTHER_RESOURCE_BUNDLE_NAME, new Locale("pt"), "B")
+                        + TestConstants.PROVIDED_RESOLVER_SUFFIX);
     }
 
 }

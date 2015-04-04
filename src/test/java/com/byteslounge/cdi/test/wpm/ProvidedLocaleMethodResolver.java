@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 byteslounge.com (Gonçalo Marques).
+ * Copyright 2015 byteslounge.com (Gonçalo Marques).
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -14,39 +14,27 @@ package com.byteslounge.cdi.test.wpm;
 
 import java.io.Serializable;
 import java.util.Locale;
-import java.util.ResourceBundle;
 
 import javax.enterprise.context.ApplicationScoped;
 
 import org.junit.Assert;
 
+import com.byteslounge.cdi.annotation.LocaleResolver;
 import com.byteslounge.cdi.annotation.PropertyBundle;
 import com.byteslounge.cdi.annotation.PropertyKey;
-import com.byteslounge.cdi.annotation.PropertyLocale;
-import com.byteslounge.cdi.annotation.PropertyResolver;
 import com.byteslounge.cdi.test.common.ApplicationScopedBean;
 import com.byteslounge.cdi.test.common.DependentScopedBean;
 import com.byteslounge.cdi.test.configuration.TestConstants;
 import com.byteslounge.cdi.test.model.TestEntity;
 
-/**
- * Used in CDI Properties integration tests. See WarDefaultMethodIT.java,
- * WarProvidedMethodIT.java, EjbDefaultMethodIT.java and
- * EjbProvidedMethodIT.java.
- * 
- * @author Gonçalo Marques
- * @since 1.0.0
- */
 @ApplicationScoped
-public class ProvidedMethodResolver implements Serializable {
+public class ProvidedLocaleMethodResolver implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    // Lets provide a set of completely mixed up parameters in what matters to "logical" definition order
-    @PropertyResolver
-    public String resolveProperty(DependentScopedBean dependentScopedBean,
-            RequestScopedBean requestScopedBean, SessionScopedBean sessionScopedBean,
-            @PropertyBundle String bundleName, @PropertyLocale Locale locale,
+    @LocaleResolver
+    public Locale resolveLocale(DependentScopedBean dependentScopedBean, RequestScopedBean requestScopedBean,
+            SessionScopedBean sessionScopedBean, @PropertyBundle String bundleName,
             ApplicationScopedBean applicationScopedBean, @PropertyKey String key, Service service) {
 
         service.remove(1L);
@@ -63,9 +51,10 @@ public class ProvidedMethodResolver implements Serializable {
         Assert.assertEquals(applicationScopedBean.getText(), TestConstants.BEAN_TEST_RETURN_VALUE);
         Assert.assertEquals(service.getText(), TestConstants.BEAN_TEST_RETURN_VALUE);
 
-        ResourceBundle bundle = ResourceBundle.getBundle(bundleName, locale);
-        String value = bundle.getString(key);
-        return value + TestConstants.PROVIDED_RESOLVER_SUFFIX;
+        Assert.assertTrue(bundleName != null && !bundleName.isEmpty());
+        Assert.assertTrue(key != null && !key.isEmpty());
+
+        return Locale.getDefault();
     }
 
 }

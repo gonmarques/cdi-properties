@@ -12,7 +12,6 @@
  */
 package com.byteslounge.cdi.test.it;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Locale;
@@ -22,9 +21,6 @@ import org.jboss.arquillian.container.test.api.RunAsClient;
 import org.jboss.arquillian.drone.api.annotation.Drone;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.arquillian.test.api.ArquillianResource;
-import org.jboss.shrinkwrap.api.Archive;
-import org.jboss.shrinkwrap.api.ShrinkWrap;
-import org.jboss.shrinkwrap.api.asset.EmptyAsset;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.junit.Assert;
 import org.junit.Test;
@@ -34,24 +30,18 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 
 import com.byteslounge.cdi.test.configuration.TestConstants;
+import com.byteslounge.cdi.test.it.common.AbstractWarDefaultPropertyMethodIT;
+import com.byteslounge.cdi.test.it.common.IntegrationTestDeploymentUtils;
 import com.byteslounge.cdi.test.utils.MessageBundleUtils;
 
 /**
- * Integration test covering the following scenario:
- * 
- * JSF web application where properties are injected into a CDI RequestScoped
- * bean.
- * 
- * The property resolver method is the extension's default.
- * 
- * Two distinct views, each one with its own Locale, are used to test the
- * property resolver.
+ * Integration Test
  * 
  * @author Gonçalo Marques
  * @since 1.0.0
  */
 @RunWith(Arquillian.class)
-public class WarDefaultMethodIT extends AbstractIntegrationTest {
+public class WarDefaultPropertyMethodIT extends AbstractWarDefaultPropertyMethodIT {
 
     @Drone
     private WebDriver browser;
@@ -69,28 +59,10 @@ public class WarDefaultMethodIT extends AbstractIntegrationTest {
     private WebElement otherAbc;
 
     @Deployment
-    public static Archive<?> createArchive() throws IOException {
+    public static WebArchive createArchive() throws IOException {
 
-        prepareClasses();
-
-        Archive<?> webArchive = ShrinkWrap
-                .create(WebArchive.class, "cdipropertiestest.war")
-                .addAsWebInfResource(EmptyAsset.INSTANCE, "beans.xml")
-                .addAsWebInfResource(new File("src/test/resources/assets/common/WEB-INF/faces-config.xml"))
-                .addAsLibrary(new File("target/cdi-properties-" + System.getProperty("project.version") + ".jar"))
-                .addAsWebInfResource(new File("src/test/resources/bl/messages.properties"), "classes/bl/messages.properties")
-                .addAsWebInfResource(new File("src/test/resources/bl/messages_pt.properties"), "classes/bl/messages_pt.properties")
-                .addAsWebInfResource(new File("src/test/resources/bl/other.properties"), "classes/bl/other.properties")
-                .addAsWebInfResource(new File("src/test/resources/bl/other_pt.properties"), "classes/bl/other_pt.properties")
-                .setWebXML(new File("src/test/resources/assets/warCommon/WEB-INF/web.xml"))
-                .addAsWebResource(new File("src/test/resources/assets/warCommon/webapp/cditest.xhtml"))
-                .addAsWebResource(new File("src/test/resources/assets/warCommon/webapp/cditestpt.xhtml"))
-                .addAsWebInfResource(new File(TestConstants.EXTERNAL_CLASSES_DIRECTORY + "/com/byteslounge/cdi/test/common/TestBean.class"),
-                        "classes/com/byteslounge/cdi/test/common/TestBean.class")
-                .addAsWebInfResource(new File(TestConstants.EXTERNAL_CLASSES_DIRECTORY + "/com/byteslounge/cdi/test/common/InjectedBean.class"),
-                        "classes/com/byteslounge/cdi/test/common/InjectedBean.class")
-                .addAsWebInfResource(new File("src/test/resources/assets/resources/logging.properties"), "classes/logging.properties");
-        System.out.println("\n\n" + webArchive.toString(true) + "\n\n");
+        WebArchive webArchive = AbstractWarDefaultPropertyMethodIT.createArchive();
+        IntegrationTestDeploymentUtils.printArchive(webArchive);
         return webArchive;
     }
 

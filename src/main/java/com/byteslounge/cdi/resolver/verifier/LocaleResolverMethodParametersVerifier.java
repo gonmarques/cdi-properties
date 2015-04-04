@@ -26,10 +26,10 @@ import com.byteslounge.cdi.exception.ExtensionInitializationException;
  */
 public class LocaleResolverMethodParametersVerifier implements ResolverMethodVerifier {
 
-    private final AnnotatedMethod<?> propertyResolverMethod;
+    private final AnnotatedMethod<?> localeResolverMethod;
 
-    public LocaleResolverMethodParametersVerifier(AnnotatedMethod<?> propertyResolverMethod) {
-        this.propertyResolverMethod = propertyResolverMethod;
+    public LocaleResolverMethodParametersVerifier(AnnotatedMethod<?> localeResolverMethod) {
+        this.localeResolverMethod = localeResolverMethod;
     }
 
     /**
@@ -45,7 +45,7 @@ public class LocaleResolverMethodParametersVerifier implements ResolverMethodVer
      * {@link PropertyLocale}
      */
     private void checkLocaleResolverParameterAnnotations() {
-        for (final AnnotatedParameter<?> parameter : propertyResolverMethod.getParameters()) {
+        for (final AnnotatedParameter<?> parameter : localeResolverMethod.getParameters()) {
             if (parameter.isAnnotationPresent(PropertyLocale.class)) {
                 throw new ExtensionInitializationException(
                         "A Locale resolver method parameter must not be annotated with: "
