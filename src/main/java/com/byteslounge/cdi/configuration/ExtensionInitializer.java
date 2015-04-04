@@ -46,7 +46,12 @@ public class ExtensionInitializer implements ServletContainerInitializer {
             logger.info("Found a default resource bundle name in web application context parameters. Will set it as: " + defaultResourceBundleBaseName);
             ExtensionConfiguration.INSTANCE.setResourceBundleDefaultBaseName(defaultResourceBundleBaseName);
         }
-        LocaleResolverFactory.setLocaleResolver(new JSFLocaleResolver());
+        try {
+            Class.forName("javax.faces.context.FacesContext");
+            LocaleResolverFactory.setLocaleResolver(new JSFLocaleResolver());
+        } catch (ClassNotFoundException e) {
+            logger.info("FacesContext not present in the application's classpath");
+        }
     }
 
 }

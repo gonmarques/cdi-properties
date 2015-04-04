@@ -32,6 +32,8 @@ public class JSFLocaleResolver implements LocaleResolver {
     public Locale getLocale() {
         try {
             return FacesContext.getCurrentInstance().getViewRoot().getLocale();
+        }catch(NoClassDefFoundError e) {
+            return Locale.getDefault();
         } catch (Exception e) {
             return Locale.getDefault();
         }
