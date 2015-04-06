@@ -37,13 +37,11 @@ import com.byteslounge.cdi.resolver.context.ResolverContext;
 public class InjectableResolverParameter implements InjectionPoint, ResolverParameter<Object> {
 
     private final AnnotatedParameter<?> parameter;
-    private final BeanManager beanManager;
-    private final Bean<?> propertyResolverBean;
+    private BeanManager beanManager;
+    private Bean<?> resolverBean;
 
-    public InjectableResolverParameter(AnnotatedParameter<?> parameter, BeanManager beanManager, Bean<?> propertyResolverBean) {
+    public InjectableResolverParameter(AnnotatedParameter<?> parameter) {
         this.parameter = parameter;
-        this.beanManager = beanManager;
-        this.propertyResolverBean = propertyResolverBean;
     }
 
     /**
@@ -59,7 +57,7 @@ public class InjectableResolverParameter implements InjectionPoint, ResolverPara
      */
     @Override
     public Bean<?> getBean() {
-        return propertyResolverBean;
+        return resolverBean;
     }
 
     /**
@@ -113,6 +111,8 @@ public class InjectableResolverParameter implements InjectionPoint, ResolverPara
      */
     @Override
     public <T> Object resolve(ResolverContext resolverContext, CreationalContext<T> ctx) {
+        resolverBean = resolverContext.getResolverBean();
+        beanManager = resolverContext.getBeanManager();
         return beanManager.getInjectableReference(this, ctx);
     }
 

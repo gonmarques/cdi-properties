@@ -12,6 +12,9 @@
  */
 package com.byteslounge.cdi.resolver.context;
 
+import javax.enterprise.inject.spi.Bean;
+import javax.enterprise.inject.spi.BeanManager;
+
 /**
  * Represents the resolver context which is used during property resolution.
  * 
@@ -22,6 +25,8 @@ public class ResolverContext {
 
     private final String key;
     private final String bundleName;
+    private Bean<?> resolverBean;
+    private BeanManager beanManager;
 
     private ResolverContext(String key, String bundleName) {
         this.key = key;
@@ -56,6 +61,42 @@ public class ResolverContext {
      */
     public String getBundleName() {
         return bundleName;
+    }
+
+    /**
+     * Sets the resolver bean associated with the current resolving execution
+     * 
+     * @param resolverBean the property key to be associated with the created context
+     */
+    public void setResolverBean(Bean<?> resolverBean) {
+        this.resolverBean = resolverBean;
+    }
+
+    /**
+     * Gets the resolver bean associated with the current resolving execution
+     * 
+     * @return the resolver bean associated with the current resolving execution
+     */
+    public Bean<?> getResolverBean() {
+        return resolverBean;
+    }
+
+    /**
+     * Gets the bean manager associated with the current resolving execution
+     * 
+     * @return the bean manager associated with the current resolving execution
+     */
+    public BeanManager getBeanManager() {
+        return beanManager;
+    }
+
+    /**
+     * Sets the bean manager associated with the current resolving execution
+     * 
+     * @param beanManager the bean manager associated with the current resolving execution
+     */
+    public void setBeanManager(BeanManager beanManager) {
+        this.beanManager = beanManager;
     }
 
 }

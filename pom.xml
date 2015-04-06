@@ -4,7 +4,7 @@
 
 	<groupId>com.byteslounge</groupId>
 	<artifactId>cdi-properties</artifactId>
-	<version>1.1.0</version>
+	<version>1.1.1</version>
 	<packaging>jar</packaging>
 
 	<name>CDI Properties</name>
