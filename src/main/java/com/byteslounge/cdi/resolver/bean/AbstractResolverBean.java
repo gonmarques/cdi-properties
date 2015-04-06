@@ -18,13 +18,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
-import java.util.Set;
 
 import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.inject.spi.AnnotatedMethod;
 import javax.enterprise.inject.spi.AnnotatedParameter;
 import javax.enterprise.inject.spi.AnnotatedType;
-import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.BeanManager;
 
 import org.slf4j.Logger;
@@ -33,6 +31,7 @@ import org.slf4j.LoggerFactory;
 import com.byteslounge.cdi.exception.ExtensionInitializationException;
 import com.byteslounge.cdi.extension.param.InjectableResolverParameter;
 import com.byteslounge.cdi.extension.param.ResolverParameter;
+import com.byteslounge.cdi.resolver.bean.ResolverInstanceLazyInitializer.ResolverInstance;
 import com.byteslounge.cdi.resolver.context.ResolverContext;
 import com.byteslounge.cdi.resolver.extractor.BundleResolverParameterExtractor;
 import com.byteslounge.cdi.resolver.extractor.KeyResolverParameterExtractor;
@@ -55,8 +54,8 @@ public abstract class AbstractResolverBean<T> implements ResolverBean<T> {
     private AnnotatedMethod<?> providedResolverMethod = null;
     private List<ResolverParameter<?>> resolverParameters;
     private ResolverBean<Locale> localeResolverBean;
-    protected Object resolverInstance;
     protected AnnotatedMethod<?> resolverMethod = null;
+    private ResolverInstanceLazyInitializer lazyInitializer;
 
     public AbstractResolverBean(Class<? extends Annotation> typeToSearch, String resolverDescription,
             Class<?> defaulResolverClass) {
@@ -110,19 +109,8 @@ public abstract class AbstractResolverBean<T> implements ResolverBean<T> {
     @Override
     public void initialize(final BeanManager beanManager) {
         validate();
-        Class<?> resolverMethodClass = resolverMethod.getJavaMember().getDeclaringClass();
-        Set<Bean<?>> beans = beanManager.getBeans(resolverMethodClass);
-        final Bean<?> resolverBean = beanManager.resolve(beans);
-        if (resolverBean == null) {
-            throw new ExtensionInitializationException(
-                    "Could not resolve bean for class: "
-                            + resolverMethodClass.getName()
-                            + ". The class is probably deployed in a module that is not accessible by the CDI Properties extension classloader."
-                            + " Try to deploy the resolver class in a library JAR instead.");
-        }
-        CreationalContext<?> creationalContext = beanManager.createCreationalContext(resolverBean);
-        resolverInstance = beanManager.getReference(resolverBean, resolverMethodClass,
-                creationalContext);
+        lazyInitializer = new ResolverInstanceLazyInitializer(beanManager, resolverMethod.getJavaMember()
+                .getDeclaringClass());
         resolverParameters = new ArrayList<>();
         List<ResolverParameterExtractor<? extends ResolverParameter<?>>> extractors = Arrays
                 .asList(new ResolverParameterExtractor<?>[] { new KeyResolverParameterExtractor(),
@@ -131,8 +119,7 @@ public abstract class AbstractResolverBean<T> implements ResolverBean<T> {
                         new ResolverParameterExtractor<InjectableResolverParameter>() {
                             @Override
                             public InjectableResolverParameter extract(AnnotatedParameter<?> parameter) {
-                                return new InjectableResolverParameter(parameter, beanManager,
-                                        resolverBean);
+                                return new InjectableResolverParameter(parameter);
                             }
                         } });
         for (final AnnotatedParameter<?> parameter : resolverMethod.getParameters()) {
@@ -154,6 +141,9 @@ public abstract class AbstractResolverBean<T> implements ResolverBean<T> {
     @Override
     @SuppressWarnings("unchecked")
     public T invoke(ResolverContext resolverContext, CreationalContext<?> ctx) {
+        ResolverInstance resolverInstance = lazyInitializer.get();
+        resolverContext.setResolverBean(resolverInstance.getResolverBean());
+        resolverContext.setBeanManager(resolverInstance.getActiveBeanManager());
         List<Object> parameters = new ArrayList<>();
         if (logger.isDebugEnabled()) {
             logger.debug("About to resolve parameters of " + resolverDescription + " resolver method");
@@ -165,7 +155,8 @@ public abstract class AbstractResolverBean<T> implements ResolverBean<T> {
             logger.debug("Parameters resolved. Invoking " + resolverDescription + " resolver method.");
         }
         try {
-            return (T) resolverMethod.getJavaMember().invoke(resolverInstance, parameters.toArray());
+            return (T) resolverMethod.getJavaMember().invoke(resolverInstance.getResolverInstance(),
+                    parameters.toArray());
         } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
             throw new RuntimeException("Could not invoke resolver", e);
         }
@@ -197,3 +188,4 @@ public abstract class AbstractResolverBean<T> implements ResolverBean<T> {
     }
 
 }
+
