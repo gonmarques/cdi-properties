@@ -239,12 +239,12 @@ Another important consideration is that `@Stateless` or `@Singleton` EJBs and `@
 
 CDI Properties includes Arquillian based Integration Tests (resorting to Arquillian Drone and Graphene in order to automate front-end application testing) that cover the following use case scenarios:
 
- - **Web application that is not JSF based using the default resolver method**
- - **JSF based web application using the default property resolver method**
- - **Web application using a custom property resolver method**
- - **Web application with a custom locale resolver method that fetches the current user locale from a CDI session scoped bean**
- - **Web application with a custom locale resolver method that fetches the current user locale from a ThreadLocal variable**
- - **Web application with both custom property and locale resolver methods with CDI managed beans from all scopes being injected into the methods plus EJBs, and the EJBs persist and load data from a database inside the resolver methods**
+ - Web application that is **not** JSF based using the default resolver method
+ - JSF based web application using the **default** property resolver method
+ - Web application using a **custom** property resolver method
+ - Web application with a **custom** locale resolver method that fetches the current user locale from a CDI session scoped bean
+ - Web application with a **custom** locale resolver method that fetches the current user locale from a ThreadLocal variable
+ - Web application with both **custom** property and locale resolver methods with CDI managed beans from all scopes being injected into the methods plus EJBs, and the EJBs persist and load data from a database inside the resolver methods
   
- - **EJB standalone module that uses the default property resolver method**
- - **EJB standalone module with a custom property resolver method with CDI managed beans being injected into the method plus EJBs, and the EJBs persist and load data from a database inside the resolver method**
+ - EJB standalone module that uses the **default** property resolver method
+ - EJB standalone module with a **custom** property resolver method with CDI managed beans being injected into the method plus EJBs, and the EJBs persist and load data from a database inside the resolver method
