@@ -22,6 +22,8 @@ import com.byteslounge.cdi.test.common.DependentScopedBean;
 import com.byteslounge.cdi.test.common.InjectedBean;
 import com.byteslounge.cdi.test.common.TestBean;
 import com.byteslounge.cdi.test.it.common.IntegrationTestDeploymentUtils.DeploymentAppenderFactory;
+import com.byteslounge.cdi.test.it.common.IntegrationTestDeploymentUtils.ServerType;
+import com.byteslounge.cdi.test.model.IdGenerator;
 import com.byteslounge.cdi.test.model.TestEntity;
 import com.byteslounge.cdi.test.wpm.ProvidedPropertyMethodResolver;
 import com.byteslounge.cdi.test.wpm.RequestScopedBean;
@@ -37,20 +39,19 @@ import com.byteslounge.cdi.test.wpm.SessionScopedBean;
  */
 public class CommonWarProvidedPropertyMethod {
 
-    public static WebArchive createArchive() throws IOException {
+    public static WebArchive createArchive(ServerType serverType) throws IOException {
 
         WebArchive webArchive = ShrinkWrap.create(WebArchive.class, "cdipropertiestest.war").addClasses(TestBean.class,
                 InjectedBean.class, ApplicationScopedBean.class, DependentScopedBean.class,
                 ProvidedPropertyMethodResolver.class, RequestScopedBean.class, SessionScopedBean.class, Service.class,
-                ServiceBean.class, TestEntity.class);
+                ServiceBean.class, TestEntity.class, IdGenerator.class);
         DeploymentAppenderFactory
                 .create(webArchive)
                 .appendWebXml("../cdi-properties-test-common/src/test/resources/assets/warCommon/WEB-INF/web.xml")
                 .appendWebResource(
                         "../cdi-properties-test-common/src/test/resources/assets/warCommon/webapp/cditest.xhtml",
                         "../cdi-properties-test-common/src/test/resources/assets/warCommon/webapp/cditestpt.xhtml")
-                .appendBeansXml()
-                .appendPersistenceXml()
+                .appendBeansXml().appendPersistenceXml(serverType)
                 .appendFacesConfig().appendCDIPropertiesLib().appendLogging().appendProperties()
                 .appendOtherProperties();
 

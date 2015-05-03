@@ -21,6 +21,8 @@ import com.byteslounge.cdi.test.common.DependentScopedBean;
 import com.byteslounge.cdi.test.common.InjectedBean;
 import com.byteslounge.cdi.test.it.common.AbstractWarDefaultPropertyMethod;
 import com.byteslounge.cdi.test.it.common.IntegrationTestDeploymentUtils.DeploymentAppenderFactory;
+import com.byteslounge.cdi.test.it.common.IntegrationTestDeploymentUtils.ServerType;
+import com.byteslounge.cdi.test.model.IdGenerator;
 import com.byteslounge.cdi.test.model.TestEntity;
 import com.byteslounge.cdi.test.wpm.ProvidedLocaleMethodResolver;
 import com.byteslounge.cdi.test.wpm.RequestScopedBean;
@@ -36,13 +38,14 @@ import com.byteslounge.cdi.test.wpm.SessionScopedBean;
  */
 public class CommonWarDefaultPropertyProvidedLocaleMethodAll extends AbstractWarDefaultPropertyMethod {
 
-    public static WebArchive createArchive() throws IOException {
+    public static WebArchive createArchive(ServerType serverType) throws IOException {
 
         WebArchive webArchive = AbstractWarDefaultPropertyMethod.createArchive().addClasses(
                 ProvidedLocaleMethodResolver.class, RequestScopedBean.class, SessionScopedBean.class, Service.class,
-                ServiceBean.class, TestEntity.class, InjectedBean.class, ApplicationScopedBean.class,
+                ServiceBean.class, TestEntity.class, IdGenerator.class, InjectedBean.class,
+                ApplicationScopedBean.class,
                 DependentScopedBean.class);
-        DeploymentAppenderFactory.create(webArchive).appendPersistenceXml();
+        DeploymentAppenderFactory.create(webArchive).appendPersistenceXml(serverType);
 
         return webArchive;
     }

@@ -65,7 +65,7 @@ public class EjbProvidedMethodResolver implements Serializable {
         TestEntity testEntity = new TestEntity();
         testEntity.setId(1L);
         testEntity.setDescription("Description");
-        serviceEjbProvidedMethod.persist(testEntity);
+        testEntity = serviceEjbProvidedMethod.merge(testEntity);
         TestEntity other = serviceEjbProvidedMethod.findById(1L);
         Assert.assertEquals(new Long(1L), other.getId());
 

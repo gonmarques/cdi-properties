@@ -32,6 +32,7 @@ import org.openqa.selenium.support.FindBy;
 
 import com.byteslounge.cdi.test.configuration.TestConstants;
 import com.byteslounge.cdi.test.it.common.IntegrationTestDeploymentUtils;
+import com.byteslounge.cdi.test.it.common.IntegrationTestDeploymentUtils.ServerType;
 import com.byteslounge.cdi.test.utils.MessageBundleUtils;
 
 /**
@@ -60,7 +61,7 @@ public class WarProvidedPropertyMethodIT {
 
     @Deployment
     public static Archive<?> createArchive() throws IOException {
-        WebArchive webArchive = CommonWarProvidedPropertyMethod.createArchive();
+        WebArchive webArchive = CommonWarProvidedPropertyMethod.createArchive(ServerType.GLASSFISH);
         IntegrationTestDeploymentUtils.addMavenDependencies(webArchive,
                 "org.slf4j:slf4j-api:" + System.getProperty("slf4j-api.version"),
                 "org.slf4j:slf4j-jdk14:" + System.getProperty("slf4j-api.version"));

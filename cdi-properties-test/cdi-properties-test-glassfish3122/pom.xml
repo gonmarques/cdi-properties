@@ -70,7 +70,7 @@
 						<slf4j-api.version>${slf4j-api.version}</slf4j-api.version>
 						<h2.version>${h2.version}</h2.version>
 					</systemPropertyVariables>
-					<skipTests>${skipTests}</skipTests>
+					<skipTests>${skipGF3Tests}</skipTests>
 					<argLine>-Xmx512m -XX:MaxPermSize=256m</argLine>
 					<printSummary>true</printSummary>
 					<redirectTestOutputToFile>true</redirectTestOutputToFile>
@@ -188,6 +188,10 @@
 					<artifactId>arquillian-config-api</artifactId>
 					<groupId>org.jboss.arquillian.config</groupId>
 				</exclusion>
+				<exclusion>
+					<artifactId>arquillian-core-spi</artifactId>
+					<groupId>org.jboss.arquillian.core</groupId>
+				</exclusion>
 			</exclusions>
 		</dependency>
 		<dependency>
@@ -198,6 +202,10 @@
 				<exclusion>
 					<artifactId>arquillian-config-api</artifactId>
 					<groupId>org.jboss.arquillian.config</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>arquillian-core-spi</artifactId>
+					<groupId>org.jboss.arquillian.core</groupId>
 				</exclusion>
 			</exclusions>
 		</dependency>
@@ -216,6 +224,10 @@
 					<artifactId>arquillian-config-api</artifactId>
 					<groupId>org.jboss.arquillian.config</groupId>
 				</exclusion>
+				<exclusion>
+					<artifactId>arquillian-core-spi</artifactId>
+					<groupId>org.jboss.arquillian.core</groupId>
+				</exclusion>
 			</exclusions>
 		</dependency>
 		
@@ -225,6 +237,12 @@
 		    <version>${graphene-webdriver.version}</version>
 		    <type>pom</type>
 		    <scope>test</scope>
+		    <exclusions>
+		    	<exclusion>
+		    		<artifactId>arquillian-core-spi</artifactId>
+		    		<groupId>org.jboss.arquillian.core</groupId>
+		    	</exclusion>
+		    </exclusions>
 		</dependency>
 		
 		<dependency>

@@ -21,6 +21,8 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
+import org.hibernate.annotations.GenericGenerator;
+
 /**
  * Used in CDI Properties integration tests. See WarDefaultMethodIT.java,
  * WarProvidedMethodIT.java, EjbDefaultMethodIT.java and
@@ -37,7 +39,8 @@ public class TestEntity implements Serializable {
 
     @Id
     @Column(name = "ID", nullable = false)
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.AUTO, generator = "IdGenerator")
+    @GenericGenerator(name = "IdGenerator", strategy = "com.byteslounge.cdi.test.model.IdGenerator")
     private Long id;
 
     @Column(name = "DESCRIPTION", nullable = false)

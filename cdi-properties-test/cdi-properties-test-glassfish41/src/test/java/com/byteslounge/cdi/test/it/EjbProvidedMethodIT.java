@@ -33,6 +33,7 @@ import org.openqa.selenium.support.FindBy;
 
 import com.byteslounge.cdi.test.configuration.TestConstants;
 import com.byteslounge.cdi.test.it.common.IntegrationTestDeploymentUtils;
+import com.byteslounge.cdi.test.it.common.IntegrationTestDeploymentUtils.ServerType;
 import com.byteslounge.cdi.test.utils.MessageBundleUtils;
 
 /**
@@ -61,7 +62,7 @@ public class EjbProvidedMethodIT {
 
     @Deployment(name = "EAR", order = 1)
     public static Archive<?> createEnterpriseArchive() throws IOException {
-        EnterpriseArchive archive = CommonEjbProvidedMethod.createEnterpriseArchive();
+        EnterpriseArchive archive = CommonEjbProvidedMethod.createEnterpriseArchive(ServerType.GLASSFISH);
         IntegrationTestDeploymentUtils.addMavenDependencies(archive,
                 "org.slf4j:slf4j-api:" + System.getProperty("slf4j-api.version"),
                 "org.slf4j:slf4j-jdk14:" + System.getProperty("slf4j-api.version"));

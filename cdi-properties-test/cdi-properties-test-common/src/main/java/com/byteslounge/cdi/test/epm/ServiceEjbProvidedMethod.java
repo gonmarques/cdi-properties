@@ -31,7 +31,7 @@ public interface ServiceEjbProvidedMethod extends Serializable {
 
     String getText();
 
-    void persist(TestEntity testEntity);
+    TestEntity merge(TestEntity testEntity);
 
     TestEntity findById(Long id);
 

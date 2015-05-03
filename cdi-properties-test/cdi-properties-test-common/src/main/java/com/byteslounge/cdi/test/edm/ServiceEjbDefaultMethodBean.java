@@ -72,7 +72,16 @@ public class ServiceEjbDefaultMethodBean implements ServiceEjbDefaultMethod {
         entity = new TestEntity();
         entity.setId(1L);
         entity.setDescription("Description");
-        entityManager.persist(entity);
+        try {
+            // Yes this try/catch is extremely bad but I want to support both eclipselink 
+            // and hibernate in integration tests and I dont want to implement nothing 
+            // fancy "just" for integration tests.
+            // Luckily the exception is just an illegal argument and the persistence context
+            // does not become stale
+            entityManager.merge(entity);
+        } catch (Exception e) {
+            entityManager.persist(entity);
+        }
         entityManager.flush();
         return helloWorld;
     }

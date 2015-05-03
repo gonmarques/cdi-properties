@@ -24,6 +24,8 @@ import com.byteslounge.cdi.test.edm.ServiceEjbDefaultMethod;
 import com.byteslounge.cdi.test.edm.ServiceEjbDefaultMethodBean;
 import com.byteslounge.cdi.test.edm.TestEjbDefaultBean;
 import com.byteslounge.cdi.test.it.common.IntegrationTestDeploymentUtils.DeploymentAppenderFactory;
+import com.byteslounge.cdi.test.it.common.IntegrationTestDeploymentUtils.ServerType;
+import com.byteslounge.cdi.test.model.IdGenerator;
 import com.byteslounge.cdi.test.model.TestEntity;
 
 /**
@@ -34,12 +36,12 @@ import com.byteslounge.cdi.test.model.TestEntity;
  */
 public class CommonEjbDefaultMethod {
 
-    public static EnterpriseArchive createEnterpriseArchive() throws IOException {
+    public static EnterpriseArchive createEnterpriseArchive(ServerType serverType) throws IOException {
 
         JavaArchive ejbModule = ShrinkWrap.create(JavaArchive.class, "cdipropertiesejb.jar").addClasses(
-                ServiceEjbDefaultMethod.class, InjectedBean.class, TestEntity.class, ServiceEjbDefaultMethodBean.class);
-        DeploymentAppenderFactory.create(ejbModule).appendBeansXml()
-                .appendPersistenceXml();
+                ServiceEjbDefaultMethod.class, InjectedBean.class, TestEntity.class, IdGenerator.class,
+                ServiceEjbDefaultMethodBean.class);
+        DeploymentAppenderFactory.create(ejbModule).appendBeansXml().appendPersistenceXml(serverType);
 
         JavaArchive resourcesJar = ShrinkWrap.create(JavaArchive.class, "resources.jar");
         DeploymentAppenderFactory.create(resourcesJar).appendLogging().appendProperties().appendOtherProperties()

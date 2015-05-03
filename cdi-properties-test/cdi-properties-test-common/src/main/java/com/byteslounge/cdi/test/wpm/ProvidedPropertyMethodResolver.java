@@ -45,7 +45,7 @@ public class ProvidedPropertyMethodResolver implements Serializable {
         TestEntity testEntity = new TestEntity();
         testEntity.setId(1L);
         testEntity.setDescription("Description");
-        service.persist(testEntity);
+        testEntity = service.merge(testEntity);
         TestEntity other = service.findById(1L);
         Assert.assertEquals(new Long(1L), other.getId());
 

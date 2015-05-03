@@ -51,6 +51,14 @@ public class IntegrationTestDeploymentUtils {
                 "glassfish-resources.xml");
     }
 
+    public static void addJBossResources(EnterpriseArchive archive) {
+        archive.addAsApplicationResource(new File("src/test/resources/h2-ds.xml"), "h2-ds.xml");
+    }
+
+    public static void addJBossResources(WebArchive archive) {
+        archive.addAsWebInfResource(new File("src/test/resources/h2-ds.xml"), "h2-ds.xml");
+    }
+
     public static void printArchive(Archive<?> archive) {
         System.out.println("\n\n" + archive.toString(true) + "\n\n");
     }
@@ -59,7 +67,7 @@ public class IntegrationTestDeploymentUtils {
 
         DeploymentAppender<T> appendBeansXml();
 
-        DeploymentAppender<T> appendPersistenceXml();
+        DeploymentAppender<T> appendPersistenceXml(ServerType serverType);
 
         DeploymentAppender<T> appendLogging();
 
@@ -68,8 +76,17 @@ public class IntegrationTestDeploymentUtils {
         DeploymentAppender<T> appendOtherProperties();
     }
 
-    
-    
+    public enum ServerType {
+
+        GLASSFISH("test-persistence.xml"), JBOSS("test-persistence-jboss.xml");
+
+        private final String persistenceXml;
+
+        private ServerType(String persistenceXml) {
+            this.persistenceXml = persistenceXml;
+        }
+    }
+
     public static class JavaDeploymentAppender implements DeploymentAppender<JavaArchive> {
 
         private final JavaArchive archive;
@@ -85,9 +102,10 @@ public class IntegrationTestDeploymentUtils {
         }
 
         @Override
-        public JavaDeploymentAppender appendPersistenceXml() {
+        public JavaDeploymentAppender appendPersistenceXml(ServerType serverType) {
             archive.addAsResource(new File(
-                    "../cdi-properties-test-common/src/test/resources/assets/common/test-persistence.xml"),
+"../cdi-properties-test-common/src/test/resources/assets/common/"
+                    + serverType.persistenceXml),
                     "META-INF/persistence.xml");
             return this;
         }
@@ -147,7 +165,7 @@ public class IntegrationTestDeploymentUtils {
         }
 
         @Override
-        public ContainerDeploymentAppender<T> appendPersistenceXml() {
+        public ContainerDeploymentAppender<T> appendPersistenceXml(ServerType serverType) {
             throw new UnsupportedOperationException();
         }
 
@@ -194,9 +212,10 @@ public class IntegrationTestDeploymentUtils {
         }
 
         @Override
-        public WebDeploymentAppender appendPersistenceXml() {
+        public WebDeploymentAppender appendPersistenceXml(ServerType serverType) {
             getArchive().addAsWebInfResource(
-                    new File("../cdi-properties-test-common/src/test/resources/assets/common/test-persistence.xml"),
+                    new File("../cdi-properties-test-common/src/test/resources/assets/common/"
+                            + serverType.persistenceXml),
                     "classes/META-INF/persistence.xml");
             return this;
         }

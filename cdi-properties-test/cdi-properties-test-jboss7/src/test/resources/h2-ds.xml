@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<datasources>
+	<datasource jndi-name="java:jboss/datasources/arquillian"
+		enabled="true" use-java-context="true" pool-name="ArquillianEmbeddedH2dbPool">
+		<connection-url>jdbc:h2:~/.h2/blproperties</connection-url>
+		<driver>h2</driver>
+		<security>
+			<user-name>blproperties</user-name>
+			<password>blproperties</password>
+		</security>
+	</datasource>
+</datasources>

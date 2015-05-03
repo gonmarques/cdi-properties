@@ -49,8 +49,8 @@ public class ServiceEjbProvidedMethodBean implements ServiceEjbProvidedMethod {
     }
 
     @Override
-    public void persist(TestEntity testEntity) {
-        entityManager.persist(testEntity);
+    public TestEntity merge(TestEntity testEntity) {
+        return entityManager.merge(testEntity);
     }
 
     @Override

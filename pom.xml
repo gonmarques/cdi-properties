@@ -17,6 +17,8 @@
 		<module>cdi-properties-test/cdi-properties-test-common</module>
 		<module>cdi-properties-test/cdi-properties-test-glassfish41</module>
 		<module>cdi-properties-test/cdi-properties-test-glassfish3122</module>
+		<module>cdi-properties-test/cdi-properties-test-jboss7</module>
+		<module>cdi-properties-test/cdi-properties-test-wildfly82</module>
 	</modules>
 
 	<licenses>
@@ -46,8 +48,12 @@
 		<junit.version>4.11</junit.version>
 		<arquillian-junit-container.version>1.1.5.Final</arquillian-junit-container.version>
 		<arquillian-glassfish-managed.version>1.0.0.CR4</arquillian-glassfish-managed.version>
+		<jboss-as-arquillian-container-managed.version>7.1.1.Final</jboss-as-arquillian-container-managed.version>
+		<wildfly-arquillian-container-managed.version>8.2.0.Final</wildfly-arquillian-container-managed.version>
 		<glassfish4.version>4.1</glassfish4.version>
 		<glassfish3.version>3.1.2.2</glassfish3.version>
+		<jboss7.version>7.1.1.Final</jboss7.version>
+		<wildfly8.version>8.2.0.Final</wildfly8.version>
 		<arquillian-drone-bom.version>1.3.1.Final</arquillian-drone-bom.version>
 		<shrinkwrap-resolver-bom.version>2.2.0-beta-2</shrinkwrap-resolver-bom.version>
 		<shrinkwrap-api.version>1.2.2</shrinkwrap-api.version>
@@ -60,18 +66,52 @@
 		<maven-javadoc-plugin.version>2.9.1</maven-javadoc-plugin.version>
 		<graphene-webdriver.version>2.0.3.Final</graphene-webdriver.version>
 		<h2.version>1.3.173</h2.version>
+		<hibernate.version>4.3.9.Final</hibernate.version>
 	</properties>
 
 	<profiles>
 		<profile>
-			<id>SkipTests</id>
+			<id>Skip GF4 Tests</id>
 			<activation>
 				<property>
-					<name>skipTests</name>
+					<name>skipGF4Tests</name>
 				</property>
 			</activation>
 			<properties>
-				<skipTests>true</skipTests>
+				<skipGF4Tests>true</skipGF4Tests>
+			</properties>
+		</profile>
+		<profile>
+			<id>Skip GF3 Tests</id>
+			<activation>
+				<property>
+					<name>skipGF3Tests</name>
+				</property>
+			</activation>
+			<properties>
+				<skipGF3Tests>true</skipGF3Tests>
+			</properties>
+		</profile>
+		<profile>
+			<id>Skip JBoss AS7 Tests</id>
+			<activation>
+				<property>
+					<name>skipJBoss7Tests</name>
+				</property>
+			</activation>
+			<properties>
+				<skipJBoss7Tests>true</skipJBoss7Tests>
+			</properties>
+		</profile>
+		<profile>
+			<id>Skip Wildfly8 Tests</id>
+			<activation>
+				<property>
+					<name>skipWildfly8Tests</name>
+				</property>
+			</activation>
+			<properties>
+				<skipWildfly8Tests>true</skipWildfly8Tests>
 			</properties>
 		</profile>
 	</profiles>
@@ -174,6 +214,27 @@
 				<scope>test</scope>
 			</dependency>
 			
+			<dependency>
+	            <groupId>org.jboss.arquillian.protocol</groupId>
+	            <artifactId>arquillian-protocol-servlet</artifactId>
+	            <version>${arquillian-junit-container.version}</version>
+	            <scope>test</scope>
+	        </dependency>
+			
+			<dependency>
+				<groupId>org.jboss.as</groupId>
+	            <artifactId>jboss-as-arquillian-container-managed</artifactId>
+	            <version>${jboss-as-arquillian-container-managed.version}</version>
+	            <scope>test</scope>
+	        </dependency>
+	        
+	        <dependency>
+				<groupId>org.wildfly</groupId>
+				<artifactId>wildfly-arquillian-container-managed</artifactId>
+				<version>${wildfly-arquillian-container-managed.version}</version>
+				<scope>test</scope>
+			</dependency>
+				        
 			<dependency>
 				<groupId>org.jboss.shrinkwrap</groupId>
 				<artifactId>shrinkwrap-api</artifactId>
