@@ -1,4 +1,4 @@
-#CDI Properties
+# CDI Properties
 
 **Build + Integration Tests status:**
 <br /><a href="https://travis-ci.org/gonmarques/cdi-properties" target="_blank"><img src="https://travis-ci.org/gonmarques/cdi-properties.svg?branch=master" alt="Build Status" /></a>
@@ -21,7 +21,7 @@
 </dependency>
 ```
 
-##Introduction
+## Introduction
 
 CDI Properties is a CDI extension that enables resource bundle injection in a CDI enabled Java EE application, requiring little to no configuration depending on the application requirements. The resource bundle source may be the typical `.properties` files or any other external resource or system.
 
@@ -34,7 +34,7 @@ The extension takes internationalization into account, meaning that it will reso
 
 The resolved properties are also converted to the expected type, meaning that if a property is injected into an `Integer` field, the resolved property will be converted to an `Integer` instance.
 
-##Usage
+## Usage
 
 The `@Property` annotation is used to inject property values into components that are managed by the CDI container (this is valid for CDI managed beans and also for EJBs).
 
@@ -60,7 +60,7 @@ system.message = The system is running a {0} box with {1} MB of available RAM
 private String systemConfigurationMessage;
 ```
 
-##Property Resolver
+## Property Resolver
 
 The extension already provides a default property resolver so the properties resolution is done **transparently** for the application.
 
@@ -148,7 +148,7 @@ public String resolveProperty(@PropertyLocale Locale locale,
 }
 ```
 
-##Locale Resolver
+## Locale Resolver
 
 The application may also provide a custom locale resolver method which will override the extension's own default locale resolver method. It's similar to what we have seen for the property resolver method but with some changes, but let's see first the extension's default resolver method.
 
@@ -193,7 +193,7 @@ public Locale resolveLocale(@PropertyBundle String bundleName,
 
 The only contextual metadata parameter type that is **not** allowed here is the locale (`@PropertyLocale`). Since we are resolving the locale it does not make sense to inject the locale into the method.
 
-##Configuration
+## Configuration
 
 The extension is ready to use just by making its own `jar` file available in the application classpath (ex: **WEB-INF/lib** directory if we are running a web application).
 
@@ -223,7 +223,7 @@ In this case, a default resource bundle will be used. The default resource bundl
   
   This configuration is equivalent to the one we have just shown for the Web application context, so it also assumes that the default message bundle is the `/com/example/messages.properties` file.
   
-##Additional considerations
+## Additional considerations
 
 If the extension is used in a standalone EJB module, and **if we define a custom property resolver method with extra parameters to be injected by the CDI container**, the injected parameter classes must be available to the resolver method classloader.
 
@@ -235,7 +235,7 @@ The previous restrictions **do not apply** to web applications (WAR files). If t
 
 Another important consideration is that `@Stateless` or `@Singleton` EJBs and `@ApplicationScoped` or `@Singleton` CDI managed beans will most likely be shared accross multiple clients, so this should be taken into consideration especially if the current user (or client) locale matters.
 
-##Integration Tests
+## Integration Tests
 
 CDI Properties includes Arquillian based Integration Tests (resorting to Arquillian Drone and Graphene in order to automate front-end application testing) that cover the following use case scenarios:
 
